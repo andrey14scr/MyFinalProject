@@ -10,5 +10,11 @@ namespace MiniBot.Products
     {
         public List<string> Ingredients { get; set; }
         public short Weight { get; set; }
+
+        public Food(float cost, string name, string description, byte score, List<string> ingredients, short weight) : base(cost, name, description, score)
+        {
+            Ingredients = ingredients;
+            Weight = weight;
+        }
     }
 }

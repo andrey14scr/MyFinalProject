@@ -6,7 +6,7 @@ namespace MiniBot
     {
         static void Main(string[] args)
         {
-            
+            Products.Product p = new Products.Product(1, "", "", 2);
         }
     }
 }
