@@ -8,6 +8,6 @@ namespace MiniBot.Products
 {
     class Sushi : Food
     {
-        public bool IsRaw { get; set; }
+        public bool IsRaw { get; private set; }
     }
 }

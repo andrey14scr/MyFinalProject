@@ -4,11 +4,11 @@ using System.Text;
 
 namespace MiniBot.Products
 {
-    class Product
+    abstract class Product
     {
-        public float Cost { get; set; }
-        public string Name { get; set; }
-        public short Amount { get; set; }
-        public string Description { get; set; }
+        public float Cost { get; private set; }
+        public string Name { get; private set; }
+        public string Description { get; private set; }
+        public byte Score { get; private set; }
     }
 }

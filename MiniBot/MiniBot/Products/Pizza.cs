@@ -8,6 +8,6 @@ namespace MiniBot.Products
 {
     class Pizza : Food
     {
-        public byte Size { get; set; }
+        public byte Size { get; private set; }
     }
 }

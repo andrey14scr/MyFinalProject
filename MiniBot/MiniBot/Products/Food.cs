@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MiniBot.Products
 {
-    class Food : Product
+    abstract class Food : Product
     {
         public List<string> Ingredients { get; set; }
         public short Weight { get; set; }

@@ -8,8 +8,8 @@ namespace MiniBot.Products
 {
     class Drink : Product
     {
-        public float Volume { get; set; }
-        public bool HasGase { get; set; }
-        public bool IsAlcohol { get; set; }
+        public float Volume { get; private set; }
+        public bool HasGase { get; private set; }
+        public bool IsAlcohol { get; private set; }
     }
 }
