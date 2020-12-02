@@ -8,11 +8,13 @@ namespace MiniBot.Products
 {
     abstract class Food : Product
     {
-        public List<string> Ingredients { get; set; }
+        public string[] Ingredients { get; set; }
         public short Weight { get; set; }
 
-        public Food(float cost, string name, string description, byte score, List<string> ingredients, short weight) : base(cost, name, description, score)
+        public Food(string name, float cost, byte score, string[] ingredients, short weight, string description = "") : base(name, cost, score, description)
         {
+            if (ingredients.Length == 0)
+                throw new Exception();
             Ingredients = ingredients;
             Weight = weight;
         }

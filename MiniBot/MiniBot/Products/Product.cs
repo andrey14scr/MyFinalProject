@@ -11,12 +11,17 @@ namespace MiniBot.Products
         public string Description { get; private set; }
         public byte Score { get; private set; }
 
-        public Product(float cost, string name, string description, byte score)
+        public Product(string name, float cost, byte score, string description)
         {
-            Cost = cost;
             Name = name;
-            Description = description;
+            Cost = cost;
             Score = score;
+            Description = description;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name}: {Cost:$0.00}";
         }
     }
 }
