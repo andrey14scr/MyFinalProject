@@ -9,9 +9,22 @@ namespace MiniBot.Products
     class Sushi : Food
     {
         public bool IsRaw { get; private set; }
-        public Sushi(string name, float cost, byte score, string[] ingredients, short weight, byte size, bool israw, string description = "") : base(name, cost, score, ingredients, weight, description)
+        public Sushi(string name, float cost, byte score, string description, string[] ingredients, short weight, bool israw) : base(name, cost, score, description, ingredients, weight)
         {
             IsRaw = israw;
+        }
+
+        public string GetInfo()
+        {
+            string info = !String.Equals(Description, String.Empty) ? $"Description: {Description}, " : "";
+            info += IsRaw ? "raw\n" : "fried\n";
+
+            return $"{Name}\n" +
+                $"Price: {Cost:$0.00}\n" +
+                $"Weight: {Weight}g\n" +
+                info +
+                $"Ingredients: {this.GetComposition()}\n" +
+                $"Rating: {(float)Score / 2:0.0}*";
         }
     }
 }
