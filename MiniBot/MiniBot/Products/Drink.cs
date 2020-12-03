@@ -19,15 +19,23 @@ namespace MiniBot.Products
             IsAlcohol = isalcohol;
         }
 
-        public string GetInfo()
+        private string GetInfo()
         {
             string info = !String.Equals(Description, String.Empty) ? $"Description: {Description}, " : "";
             info += HasGase ? "with gase, " : "without gase, ";
             info += IsAlcohol ? "alcoholic\n" : "no alcohol\n";
-            return $"{Name} {Volume:0.0}L\n" +
+            return $"Volume: {Volume:0.0}L\n" +
                 $"Price: {Cost:$0.00}\n" +
                 info +
                 $"Rating: {(float)Score/2:0.0}*";
+        }
+
+        public void WriteInfo()
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"{Name} ");
+            Console.ResetColor();
+            Console.WriteLine(GetInfo());
         }
     }
 }

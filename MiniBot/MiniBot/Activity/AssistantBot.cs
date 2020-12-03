@@ -4,11 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static MiniBot.Activity.Sources;
 
 namespace MiniBot.Activity
 {
     class AssistantBot : IBot
     {
+        public string BotName { get; private set; } = "Henry";
+        public BotState State { get; private set; }
+        public string Customer { get; set; }
+        
         public void DoAction()
         {
             throw new NotImplementedException();
@@ -21,7 +26,17 @@ namespace MiniBot.Activity
 
         public void SendMessage(string msg)
         {
-            throw new NotImplementedException();
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($"{BotName}: ");
+            Console.ResetColor();
+            Console.WriteLine(msg);
+            if (State == BotState.WriteAndWait)
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.Write($"{Customer}: ");
+                Console.ResetColor();
+                Console.ReadLine();
+            }
         }
     }
 }

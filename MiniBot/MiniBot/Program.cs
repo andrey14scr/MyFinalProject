@@ -1,4 +1,5 @@
 ﻿using System;
+using MiniBot.Activity;
 using MiniBot.Products;
 
 namespace MiniBot
@@ -10,17 +11,20 @@ namespace MiniBot
             Drink d = new Drink("Coca-Cola", 10.5f, 8, "cool drink", 1f, false, false);
 
             //Console.WriteLine(d.ToString());
-            Console.WriteLine(d.GetInfo());
+            d.WriteInfo();
 
             Console.WriteLine();
 
             string[] str = new string[] { "Cheese", "Meet" };
             Pizza p = new Pizza("Narodnaya", 22.42f, 9, "great choice", str, 300, 25);
-            Console.WriteLine(p.GetInfo());
+            p.WriteInfo();
 
             Console.WriteLine();
             Sushi s = new Sushi("hiku", 2.1f, 10, "very yammy", str, 12, true);
-            Console.WriteLine(s.GetInfo());
+            s.WriteInfo();
+
+            AssistantBot bot = new AssistantBot();
+            bot.SendMessage("Hello world");
         }
     }
 }

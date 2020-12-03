@@ -8,6 +8,11 @@ namespace MiniBot.Activity
 {
     interface Sources
     {
-
+        enum BotState
+        {
+            Sleep,
+            Write,
+            WriteAndWait,
+        }
     }
 }
