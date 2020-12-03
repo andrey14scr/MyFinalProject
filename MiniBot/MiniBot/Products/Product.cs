@@ -10,6 +10,7 @@ namespace MiniBot.Products
         public string Name { get; private set; }
         public string Description { get; private set; }
         public byte Score { get; set; }
+        public byte Discount { get; set; }
 
         public Product(string name, float cost, byte score, string description)
         {

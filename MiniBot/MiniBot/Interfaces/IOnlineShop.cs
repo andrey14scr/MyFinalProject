@@ -10,6 +10,8 @@ namespace MiniBot.Interfaces
     interface IOnlineShop
     {
         void Buy(Product product, byte amount = 1);
-        void Estimate(Product product, byte score);
+        void Estimate(byte score);
+        void ComplectOrder();
+        void Deliver();
     }
 }
