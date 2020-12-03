@@ -9,7 +9,7 @@ namespace MiniBot.Interfaces
     interface IBot
     {
         void SendMessage(string msg);
-        void GetAnswer(string answer);
-        void DoAction();
+        void GetAnswer();
+        void DoAction(string command);
     }
 }

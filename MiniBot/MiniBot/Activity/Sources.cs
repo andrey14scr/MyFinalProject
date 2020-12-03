@@ -6,13 +6,25 @@ using System.Threading.Tasks;
 
 namespace MiniBot.Activity
 {
-    interface Sources
+    static class Sources
     {
-        enum BotState
+        public enum BotState
         {
             Sleep,
             Write,
             WriteAndWait,
+            CreateAccount,
+            AccName,
+            AccLogin,
+            AccPassword,
+            AccountDecision
         }
+
+        public static string CommandHelp = "help";
+        public static string CommandYes = "yes";
+        public static string CommandNo = "no";
+        public static string CommandExit = "exit";
+        public static string CommandExisting = "existing";
+        public static string CommandNew = "new";
     }
 }
