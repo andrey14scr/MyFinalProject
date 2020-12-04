@@ -8,23 +8,25 @@ namespace MiniBot.Activity
 {
     static class Sources
     {
-        public enum BotState
+        public enum BotState : byte
         {
             Sleep,
             Write,
             WriteAndWait,
-            CreateAccount,
             AccName,
             AccLogin,
             AccPassword,
-            AccountDecision
+            AccountDecision,
+            FindAccount
         }
 
-        public static string CommandHelp = "help";
-        public static string CommandYes = "yes";
-        public static string CommandNo = "no";
-        public static string CommandExit = "exit";
-        public static string CommandExisting = "existing";
-        public static string CommandNew = "new";
+        public const string CommandHelp = "help";
+        //public const string CommandYes = "yes";
+        //public const string CommandNo = "no";
+        public const string CommandExit = "exit";
+        public const string ChoiceExisting = "->existing";
+        //public const string CommandNew = "new";
+        public const string ChoiceCreate = "->create";
+        public const string CommandBack = "back";
     }
 }

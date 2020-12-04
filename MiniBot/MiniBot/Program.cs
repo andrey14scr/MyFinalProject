@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using MiniBot.Activity;
 using MiniBot.Products;
 
@@ -18,23 +19,15 @@ namespace MiniBot
             //Sushi s = new Sushi("hiku", 2.1f, 10, "very yammy", str, 12, true);
 
             bot.SendMessage($"Hello, I am {bot.BotName} - your bot assistant, that can help you to take an order.\n" + 
-                whiteSpaces + "If you have some questions, just enter \"help\".\n" + 
-                whiteSpaces + "If you want to exit, just enter \"exit\" in any time.\n" + 
-                whiteSpaces + "Answer something to start.", BS.WriteAndWait);
+                bot.Indent + "If you have some questions, just enter \"help\".\n" +
+                bot.Indent + "If you want to exit, just enter \"exit\" in any time.\n" +
+                bot.Indent + "Answer something to start.", BS.WriteAndWait);
 
-            if (bot.FindAccount())
-            {
-                bot.SendMessage("Oh, I see that you don't have existing account yet. Do you want to create one?\n" +
-                    whiteSpaces + $"Answer: {Sources.CommandYes}/{Sources.CommandNo}", BS.CreateAccount);
-            }
-            else
-            {
-                bot.SendMessage("Well, I have found some account, do you want to create a new one or use the existing?\n" +
-                    whiteSpaces + $"Answer: {Sources.CommandYes}/{Sources.CommandExisting}", BS.AccountDecision);
-            }
+            bot.SendMessage("Well, to take an order you should have an account, do you want to create a new or you have the existing one?", BS.AccountDecision);
 
-            
-            //bot.Customer = myName;
+
+
+
             bot.SendMessage("Good bye!", BS.Sleep);
         }
     }

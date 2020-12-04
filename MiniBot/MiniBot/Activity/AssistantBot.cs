@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static MiniBot.Activity.Sources;
+using System.Text.Json;
+using System.IO;
 
 namespace MiniBot.Activity
 {
@@ -18,18 +20,21 @@ namespace MiniBot.Activity
             public string Name { get; set; }
         }
 
+        private List<string> _choices = new List<string>();
         private UserAccount _account;
         private string _buffer;
-        private string _lastMessage;
+        private static string _lastMessage;
         public string BotName { get; private set; }
         public BotState State { get; private set; }
         public string Customer { get; set; } = "Guest";
+        public string Indent { get; private set; }
 
         public AssistantBot() : this("Henry") { }
 
         public AssistantBot(string botname)
         {
             BotName = botname;
+            Indent = new String(' ', BotName.Length + 2);
         }
 
         public void DoAction(string command)
@@ -55,6 +60,7 @@ namespace MiniBot.Activity
             switch (State)
             {
                 case BotState.Sleep:
+                    ExitSystem();
                     break;
                 
                 case BotState.Write:
@@ -63,32 +69,15 @@ namespace MiniBot.Activity
                 case BotState.WriteAndWait:
                     break;
                 
-                case BotState.CreateAccount:
-                    State = BotState.Write;
-                    if (Equals(command, CommandYes))
-                    {
-                        CreateAccount();
-                    }
-                    else if (Equals(command, CommandNo))
-                    {
-                        State = BotState.Sleep;
-                        ExitSystem();
-                    }
-                    else
-                    {
-                        SendMessage("Sorry, I don't understand you :(", BotState.CreateAccount);
-                    }
-                    break;
-                
                 case BotState.AccName:
                     _account.Name = command;
                     Customer = Char.ToUpper(command[0]) + command.Substring(1);
                     break;
                 
                 case BotState.AccLogin:
-                    if (!command.Contains('@'))
+                    if (!command.Contains('@') && !command.Contains('.'))
                     {
-                        SendMessage("You chould enter your mail", BotState.AccLogin);
+                        SendMessage("You should enter your mail. Example: example@example.com");
                         return;
                     }
                     _account.Login = command;
@@ -100,17 +89,43 @@ namespace MiniBot.Activity
                 
                 case BotState.AccountDecision:
                     State = BotState.Write;
-                    if (Equals(command, CommandNew))
+                    if (Equals(command.Substring(Indent.Length), ChoiceCreate))
                     {
+                        State = BotState.AccountDecision;
                         CreateAccount();
                     }
-                    else if (Equals(command, CommandExisting))
+                    else if (Equals(command.Substring(Indent.Length), ChoiceExisting))
                     {
-                        State = BotState.Sleep;
+                        State = BotState.FindAccount;
+                        SendMessage("Enter your login and password through a whitespace", BotState.FindAccount);
                     }
                     else
                     {
-                        SendMessage("Sorry, I don't understand you :(", BotState.CreateAccount);
+                        SendMessage("Sorry, I don't understand you :(", BotState.AccountDecision);
+                    }
+                    break;
+
+                case BotState.FindAccount:
+                    if (Equals(command, CommandBack))
+                    {
+                        SendMessage("Do you want to create a new account or you have the existing one?", BotState.AccountDecision);
+                        break;
+                    }
+                    string[] array = command.Split(' ');
+                    if (command.Contains(" ") && array.Length == 2)
+                    {
+                        if(FindAccount(array[0], array[1]))
+                        {
+                            SendMessage($"Welcome, {Customer}!", BotState.Write);
+                        }
+                        else
+                        {
+                            SendMessage("Incorrect login or password! Try again. To come back enter \"back\"", BotState.FindAccount);
+                        }
+                    }
+                    else
+                    {
+                        SendMessage("Bad input value. Enter your login and password throuh a whitespace. Example: \"example@example.com 1234\". To come back enter \"back\"", BotState.FindAccount);
                     }
                     break;
             }
@@ -118,21 +133,20 @@ namespace MiniBot.Activity
 
         public void GetAnswer()
         {
-            WriteBotName(false);
-            _buffer = Console.ReadLine();
-            DoAction(_buffer);
-        }
-
-        private void SendMessage(string msg)
-        {
-            WriteBotName(true);
-            Console.WriteLine(msg);
-            _lastMessage = msg;
-
-            if (State != BotState.Write && State != BotState.Sleep)
+            if (State == BotState.AccountDecision)
             {
-                GetAnswer();
+                WriteChoice(Indent + ChoiceCreate);
+                WriteChoice(Indent + ChoiceExisting);
+                _buffer = _choices[ChoosePosition()];
+                _choices.Clear();
             }
+            else if (State != BotState.Sleep)
+            {
+                WriteBotName(false);
+                _buffer = Console.ReadLine();
+            }
+            
+            DoAction(_buffer);
         }
 
         public void SendMessage(string msg, BotState nextstate)
@@ -141,15 +155,19 @@ namespace MiniBot.Activity
             SendMessage(msg);
         }
 
-        public bool FindAccount()
-        {
-            return false;
-        }
-
-        private void ExitSystem()
+        #region Private methods area
+        private void SendMessage(string msg)
         {
             WriteBotName(true);
-            Console.Write("Exiting");
+            Console.WriteLine(msg);
+            _lastMessage = msg;
+
+            GetAnswer();
+        }
+
+        private void ExitSystem(int code = 0)
+        {
+            Console.Write("\nFinishing");
 
             for (int i = 0; i < 3; i++)
             {
@@ -160,8 +178,7 @@ namespace MiniBot.Activity
             Console.WriteLine();
             Thread.Sleep(500);
 
-            SendMessage("Good bye!", BotState.Sleep);
-            Environment.Exit(0);
+            Environment.Exit(code);
         }
 
         private void WriteBotName(bool isbot)
@@ -187,16 +204,16 @@ namespace MiniBot.Activity
 
         private void CreateAccount()
         {
-            State = BotState.CreateAccount;
             _account = new UserAccount();
 
-            if (State == BotState.CreateAccount)
+            if (State == BotState.AccountDecision)
             {
                 SendMessage("Enter your name, please", BotState.AccName);
                 SendMessage("Enter your login, please", BotState.AccLogin);
                 SendMessage("Enter your password, please", BotState.AccPassword);
-
-                SendMessage("Hooray! Now you have an account and you can buy something.");
+                
+                SendMessage($"Hooray! Now you have an account and you can buy something.", BotState.Write);
+                AddAccount(_account);
             }
             else
             {
@@ -204,5 +221,112 @@ namespace MiniBot.Activity
                 ExitSystem();
             }
         }
+
+        private int ChoosePosition()
+        {
+            int result = -1;
+            (int x, int y) position;
+            position = Console.GetCursorPosition();
+            int sX = position.x;
+            int sY = position.y;
+
+            int temp = _choices.Count - sY + position.y - 1;
+            bool isFirst = true;
+            while (true)
+            {
+                var cki = Console.ReadKey();
+
+                if (temp >= 0 && temp < _choices.Count && !isFirst)
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write("\r" + _choices[temp]);
+                    Console.ResetColor();
+                }
+
+                if (cki.Key == ConsoleKey.DownArrow)
+                {
+                    Console.SetCursorPosition(position.x, position.y + 1);
+                }
+                if (cki.Key == ConsoleKey.UpArrow)
+                {
+                    if (position.y > 0)
+                        Console.SetCursorPosition(position.x, position.y - 1);
+                }
+                if (cki.Key == ConsoleKey.LeftArrow)
+                {
+                    if (position.x > 0)
+                        Console.SetCursorPosition(position.x - 1, position.y);
+                }
+                if (cki.Key == ConsoleKey.RightArrow)
+                {
+                    Console.SetCursorPosition(position.x + 1, position.y);
+                }
+
+                if (cki.Key == ConsoleKey.Enter)
+                {
+                    result = temp;
+                    Console.SetCursorPosition(sX, sY);
+                    break;
+                }
+                if (cki.Key == ConsoleKey.Escape)
+                {
+                    Console.SetCursorPosition(sX, sY);
+                    return -1;
+                }
+
+                position = Console.GetCursorPosition();
+                temp = _choices.Count - sY + position.y;
+                
+                if (temp >= 0 && temp < _choices.Count)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                    Console.Write("\r" + _choices[temp]);
+                    Console.ResetColor();
+                    isFirst = false;
+                }
+            }
+
+            return result;
+        }
+
+        private void WriteChoice(string answer)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(answer);
+            Console.ResetColor();
+            _choices.Add(answer);
+        }
+        #endregion
+
+        #region Json Working
+        private async void AddAccount(UserAccount account)
+        {
+            using (FileStream fs = new FileStream("Resources\\accounts.json", FileMode.OpenOrCreate))
+            {
+                List<UserAccount> accountsList = new List<UserAccount>();
+                if (fs.Length != 0)
+                    accountsList = await JsonSerializer.DeserializeAsync<List<UserAccount>>(fs);
+                accountsList.Add(account);
+                fs.SetLength(0);
+                await JsonSerializer.SerializeAsync<List<UserAccount>>(fs, accountsList);
+            }
+        }
+
+        private bool FindAccount(string login, string password)
+        {
+            List<UserAccount> accountsArray;
+            using (StreamReader sr = new StreamReader("Resources\\accounts.json"))
+            {
+                accountsArray = JsonSerializer.Deserialize<List<UserAccount>>(sr.ReadToEnd());
+            }
+            UserAccount userAccount = accountsArray.Find(x => Equals(x.Login, login) && Equals(x.Password, password));
+            if (userAccount != null)
+            {
+                Customer = userAccount.Name;
+                return true;
+            }
+            return false;
+        }
+        #endregion
     }
 }
