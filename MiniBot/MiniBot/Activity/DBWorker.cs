@@ -114,7 +114,28 @@ namespace MiniBot.Activity
 
         public object GetFromDB()
         {
-
+            /*
+            int res = 0;
+            using (SqlConnection connection = new SqlConnection(MainConnectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    string sqlExpression = "SELECT Id FROM " + Properties.Resources.appDBTableName + " WHERE Id=(SELECT max(Id) FROM " + Properties.Resources.appDBTableName + ");";
+                    using (SqlCommand command = new SqlCommand(sqlExpression, connection))
+                    {
+                        command.ExecuteNonQuery();
+                        object o = command.ExecuteScalar();
+                        if (o != null)
+                            res = (int)o;
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    MessageBox.Show(ex.Message + "\n Id value is damaged, do not change notes!");
+                }
+            }
+            */
             return null;
         }
 

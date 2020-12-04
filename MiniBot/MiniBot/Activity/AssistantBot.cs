@@ -12,6 +12,12 @@ namespace MiniBot.Activity
 {
     class AssistantBot : IBot
     {
+        private enum MenuType : byte
+        {
+            Pizza,
+            Sushi,
+            Drink
+        }
         private class UserAccount
         {
             public string Login { get; set; }
@@ -24,9 +30,10 @@ namespace MiniBot.Activity
         private UserAccount _account;
         private string _buffer;
         private static string _lastMessage;
+        private MenuType _menu;
         public string BotName { get; private set; }
         public BotState State { get; private set; }
-        public string Customer { get; set; } = "Guest";
+        public string Customer { get; private set; } = "Guest";
         public string Indent { get; private set; }
 
         #region Ctors
@@ -71,20 +78,16 @@ namespace MiniBot.Activity
                 case BotState.Sleep:
                     ExitSystem();
                     break;
-
                 case BotState.Write:
                     break;
-
                 case BotState.WriteAndWait:
                     break;
-
                 case BotState.AccName:
                     if (BackFromAccount(command))
                         break;
                     _account.Name = command;
                     Customer = Char.ToUpper(command[0]) + command.Substring(1);
                     break;
-
                 case BotState.AccLogin:
                     if (BackFromAccount(command))
                         break;
@@ -101,7 +104,6 @@ namespace MiniBot.Activity
                         break;
                     _account.Password = command;
                     break;
-
                 case BotState.AccountDecision:
                     State = BotState.Write;
                     if (BackFromAccount(command))
@@ -117,11 +119,8 @@ namespace MiniBot.Activity
                         SendMessage("Enter your login and password through a whitespace", BotState.FindAccount);
                     }
                     else
-                    {
                         SendMessage("Sorry, I don't understand you :(", BotState.AccountDecision);
-                    }
                     break;
-
                 case BotState.FindAccount:
                     if (BackFromAccount(command))
                         break;
@@ -129,17 +128,30 @@ namespace MiniBot.Activity
                     if (command.Contains(" ") && array.Length == 2)
                     {
                         if (FindAccount(array[0], array[1]))
-                        {
                             SendMessage($"Welcome, {Customer}!", BotState.Write);
-                        }
                         else
-                        {
                             SendMessage("Incorrect login or password! Try again. To come back enter \"back\"", BotState.FindAccount);
-                        }
                     }
                     else
-                    {
                         SendMessage("Bad input value. Enter your login and password throuh a whitespace. Example: \"example@example.com 1234\". To come back enter \"back\"", BotState.FindAccount);
+                    break;
+                case BotState.AskProduct:
+                    switch (command.Substring(Indent.Length))
+                    {
+                        case ChoicePizza:
+                            SendMessage("Our menu:", BotState.ShowMenu);
+                            _menu = MenuType.Pizza;
+                            break;
+                        case ChoiceSushi:
+                            SendMessage("Our menu:", BotState.ShowMenu);
+                            _menu = MenuType.Sushi;
+                            break;
+                        case ChoiceDrink:
+                            SendMessage("Our menu:", BotState.ShowMenu);
+                            _menu = MenuType.Drink;
+                            break;
+                        default:
+                            break;
                     }
                     break;
             }
@@ -149,8 +161,8 @@ namespace MiniBot.Activity
         {
             if (State == BotState.AccountDecision)
             {
-                WriteChoice(Indent + ChoiceCreate);
-                WriteChoice(Indent + ChoiceExisting);
+                AddChoice(Indent + ChoiceCreate);
+                AddChoice(Indent + ChoiceExisting);
 
                 int index = ChoosePosition();
                 while (index < 0)
@@ -160,7 +172,35 @@ namespace MiniBot.Activity
                 _buffer = _choices[index];
                 _choices.Clear();
             }
-            else if (State != BotState.Sleep)
+            else if (State == BotState.ShowMenu)
+            {
+                switch (_menu)
+                {
+                    case MenuType.Pizza:
+                        break;
+                    case MenuType.Sushi:
+                        break;
+                    case MenuType.Drink:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else if (State == BotState.AskProduct)
+            {
+                AddChoice(Indent + ChoicePizza);
+                AddChoice(Indent + ChoiceSushi);
+                AddChoice(Indent + ChoiceDrink);
+
+                int index = ChoosePosition();
+                while (index < 0)
+                {
+                    index = ChoosePosition();
+                }
+                _buffer = _choices[index];
+                _choices.Clear();
+            }
+            else if (State != BotState.Sleep && State != BotState.Write)
             {
                 WriteBotName(false);
                 _buffer = Console.ReadLine();
@@ -251,38 +291,29 @@ namespace MiniBot.Activity
             int sX = position.x;
             int sY = position.y;
 
-            int temp = -1;
+            int temp = _choices.Count - 1;
+            Console.SetCursorPosition(position.x, --position.y);
+            Console.CursorVisible = false;
+            HighLight(_choices[_choices.Count - 1], ConsoleColor.DarkMagenta);
+
             while (true)
             {
                 var cki = Console.ReadKey(true);
                 if (temp >= 0 && temp < _choices.Count)
                 {
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.Write("\r" + _choices[temp]);
-                    Console.ResetColor();
+                    HighLight(_choices[temp], ConsoleColor.White);
                 }
 
-                if (cki.Key == ConsoleKey.DownArrow)
+                if (cki.Key == ConsoleKey.DownArrow && sY - position.y - 1 <= _choices.Count && sY - position.y - 1 > 0)
                 {
                     Console.SetCursorPosition(position.x, position.y + 1);
                 }
-                else if (cki.Key == ConsoleKey.UpArrow)
+                else if (cki.Key == ConsoleKey.UpArrow && sY - position.y + 1 <= _choices.Count && sY - position.y + 1 > 0)
                 {
-                    if (position.y > 0)
-                        Console.SetCursorPosition(position.x, position.y - 1);
-                }
-                else if (cki.Key == ConsoleKey.LeftArrow)
-                {
-                    if (position.x > 0)
-                        Console.SetCursorPosition(position.x - 1, position.y);
-                }
-                else if (cki.Key == ConsoleKey.RightArrow)
-                {
-                    Console.SetCursorPosition(position.x + 1, position.y);
+                    Console.SetCursorPosition(position.x, position.y - 1);
                 }
                 else if (cki.Key == ConsoleKey.Enter)
                 {
-                    Console.CursorVisible = true;
                     result = temp;
                     Console.SetCursorPosition(sX, sY);
                     break;
@@ -297,20 +328,24 @@ namespace MiniBot.Activity
                 position = Console.GetCursorPosition();
                 temp = _choices.Count - sY + position.y;
 
-                Console.CursorVisible = true;
                 if (temp >= 0 && temp < _choices.Count)
                 {
-                    Console.CursorVisible = false;
-                    Console.ForegroundColor = ConsoleColor.DarkMagenta;
-                    Console.Write("\r" + _choices[temp]);
-                    Console.ResetColor();
+                    HighLight(_choices[temp], ConsoleColor.DarkMagenta);
                 }
             }
 
+            Console.CursorVisible = true;
             return result;
         }
 
-        private void WriteChoice(string answer)
+        private void HighLight(string msg, ConsoleColor cc)
+        {
+            Console.ForegroundColor = cc;
+            Console.Write("\r" + msg);
+            Console.ResetColor();
+        }
+
+        private void AddChoice(string answer)
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(answer);

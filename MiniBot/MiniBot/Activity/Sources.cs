@@ -17,17 +17,23 @@ namespace MiniBot.Activity
             AccLogin,
             AccPassword,
             AccountDecision,
-            FindAccount
+            FindAccount,
+            ShowMenu,
+            AskProduct,
         }
 
         public const string CommandHelp = "-help";
         //public const string CommandYes = "yes";
         //public const string CommandNo = "no";
         public const string CommandExit = "-exit";
-        public const string ChoiceExisting = "->existing";
         //public const string CommandNew = "new";
-        public const string ChoiceCreate = "->create";
         public const string CommandBack = "-back";
+
+        public const string ChoiceExisting = "->login";
+        public const string ChoiceCreate = "->register";
+        public const string ChoicePizza = "->pizza";
+        public const string ChoiceSushi = "->sushi";
+        public const string ChoiceDrink = "->drink";
 
         public static bool IsCommand(string command)
         {
