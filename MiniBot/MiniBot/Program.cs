@@ -20,9 +20,9 @@ namespace MiniBot
             bot.SendMessage($"Hello, I am {bot.BotName} - your bot assistant, that can help you to take an order.\n" + 
                 whiteSpaces + "If you have some questions, just enter \"help\".\n" + 
                 whiteSpaces + "If you want to exit, just enter \"exit\" in any time.\n" + 
-                whiteSpaces + "Let's start.");
+                whiteSpaces + "Answer something to start.", BS.WriteAndWait);
 
-            if (!bot.FindAccount())
+            if (bot.FindAccount())
             {
                 bot.SendMessage("Oh, I see that you don't have existing account yet. Do you want to create one?\n" +
                     whiteSpaces + $"Answer: {Sources.CommandYes}/{Sources.CommandNo}", BS.CreateAccount);

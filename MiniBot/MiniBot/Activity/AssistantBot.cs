@@ -113,9 +113,6 @@ namespace MiniBot.Activity
                         SendMessage("Sorry, I don't understand you :(", BotState.CreateAccount);
                     }
                     break;
-                
-                default:
-                    break;
             }
         }
 
@@ -126,7 +123,7 @@ namespace MiniBot.Activity
             DoAction(_buffer);
         }
 
-        public void SendMessage(string msg)
+        private void SendMessage(string msg)
         {
             WriteBotName(true);
             Console.WriteLine(msg);
