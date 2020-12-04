@@ -19,9 +19,9 @@ namespace MiniBot
             //Sushi s = new Sushi("hiku", 2.1f, 10, "very yammy", str, 12, true);
 
             bot.SendMessage($"Hello, I am {bot.BotName} - your bot assistant, that can help you to take an order.\n" + 
-                bot.Indent + "If you have some questions, just enter \"help\".\n" +
-                bot.Indent + "If you want to exit, just enter \"exit\" in any time.\n" +
-                bot.Indent + "Answer something to start.", BS.WriteAndWait);
+                $"{bot.Indent}If you have some questions, just enter {Sources.CommandHelp}.\n" +
+                $"{bot.Indent}If you want to exit, just enter {Sources.CommandExit} in any time.\n" +
+                $"{bot.Indent}Answer something to start.", BS.WriteAndWait);
 
             bot.SendMessage("Well, to take an order you should have an account, do you want to create a new or you have the existing one?", BS.AccountDecision);
 

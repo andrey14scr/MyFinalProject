@@ -20,13 +20,24 @@ namespace MiniBot.Activity
             FindAccount
         }
 
-        public const string CommandHelp = "help";
+        public const string CommandHelp = "-help";
         //public const string CommandYes = "yes";
         //public const string CommandNo = "no";
-        public const string CommandExit = "exit";
+        public const string CommandExit = "-exit";
         public const string ChoiceExisting = "->existing";
         //public const string CommandNew = "new";
         public const string ChoiceCreate = "->create";
-        public const string CommandBack = "back";
+        public const string CommandBack = "-back";
+
+        public static bool IsCommand(string command)
+        {
+            if (Equals(CommandHelp, command) ||
+                Equals(CommandBack, command) ||
+                Equals(CommandExit, command))
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }
