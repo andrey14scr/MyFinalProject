@@ -11,10 +11,16 @@ namespace MiniBot
     {
         static void Main(string[] args)
         {
+            string[] str = new string[] { "Cheese", "Meet" };
+            Pizza p = new Pizza("Narodnaya", 22.42f, 9, "very tasty", str, 300, 25);
+
+            DBWorker dbw = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\GIT\MyFinalProject\MiniBot\MiniBot\Resourcers\DBProducts.mdf;Integrated Security=True");
+            dbw.AddToDB(p);
+            return;
+
             AssistantBot bot = new AssistantBot();
             string whiteSpaces = new String(' ', bot.BotName.Length + 2);
-            //string[] str = new string[] { "Cheese", "Meet" };
-            //Pizza p = new Pizza("Narodnaya", 22.42f, 9, "great choice", str, 300, 25);
+            
             //Drink d = new Drink("Coca-Cola", 10.5f, 8, "cool drink", 1f, false, false);
             //Sushi s = new Sushi("hiku", 2.1f, 10, "very yammy", str, 12, true);
 

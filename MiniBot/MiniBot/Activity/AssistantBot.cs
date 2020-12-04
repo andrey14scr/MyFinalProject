@@ -19,6 +19,7 @@ namespace MiniBot.Activity
             public string Name { get; set; }
         }
 
+        //private DBWorker _dbWorker = new DBWorker(@"D:\GIT\MYFINALPROJECT\MINIBOT\MINIBOT\RESOURCERS\DBPRODUCTS.MDF");
         private List<string> _choices = new List<string>();
         private UserAccount _account;
         private string _buffer;

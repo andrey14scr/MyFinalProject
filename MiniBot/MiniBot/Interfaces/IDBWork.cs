@@ -8,8 +8,8 @@ namespace MiniBot.Interfaces
 {
     interface IDBWork
     {
-        void AddToDB();
+        void AddToDB(object product);
         object GetFromDB();
-        void RemoveFromDB();
+        void RemoveFromDB(object product);
     }
 }
