@@ -12,5 +12,6 @@ namespace MiniBot.Interfaces
         void SendMessage(string msg, BotState nextbotstate);
         void GetAnswer();
         void DoAction(string command);
+        void Start();
     }
 }

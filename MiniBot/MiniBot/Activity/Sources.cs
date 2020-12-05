@@ -11,15 +11,27 @@ namespace MiniBot.Activity
         public enum BotState : byte
         {
             Sleep,
+            Start,
             Write,
             WriteAndWait,
             AccName,
+            AccBirthDate,
             AccLogin,
             AccPassword,
             AccountDecision,
             FindAccount,
             ShowMenu,
             AskProduct,
+            ShowProduct,
+            ProductDecision,
+            AskAmount,
+        }
+
+        public enum ProductType : byte
+        {
+            Pizza,
+            Sushi,
+            Drink
         }
 
         public const string CommandHelp = "-help";
@@ -34,6 +46,8 @@ namespace MiniBot.Activity
         public const string ChoicePizza = "->pizza";
         public const string ChoiceSushi = "->sushi";
         public const string ChoiceDrink = "->drink";
+        public const string ChoiceBack = "->back";
+        public const string ChoiceTake = "->take";
 
         public static bool IsCommand(string command)
         {

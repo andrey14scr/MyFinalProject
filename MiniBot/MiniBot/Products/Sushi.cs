@@ -14,24 +14,24 @@ namespace MiniBot.Products
             IsRaw = israw;
         }
 
-        private string GetInfo()
+        private string GetInfo(string space)
         {
-            string info = !String.Equals(Description, String.Empty) ? $"Description: {Description}, " : "";
+            string info = !String.Equals(Description, String.Empty) ? $"{space}Description: {Description}, " : space;
             info += IsRaw ? "raw\n" : "fried\n";
 
-            return $"Price: {Cost:$0.00}\n" +
-                $"Weight: {Weight}g\n" +
+            return $"{space}Price: {Cost:$0.00}\n" +
+                $"{space}Weight: {Weight}g\n" +
                 info +
-                $"Ingredients: {this.GetComposition()}\n" +
-                $"Rating: {(float)Score / 2:0.0}*";
+                $"{space}Ingredients: {this.GetComposition()}\n" +
+                $"{space}Rating: {(float)Score / 2:0.0}*";
         }
 
-        public void WriteInfo()
+        public void WriteInfo(string space)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"{Name} ");
+            Console.WriteLine($"{space}{Name} ");
             Console.ResetColor();
-            Console.WriteLine(GetInfo());
+            Console.WriteLine(GetInfo(space));
         }
     }
 }

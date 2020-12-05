@@ -7,30 +7,32 @@ using System.Threading;
 using static MiniBot.Activity.Sources;
 using System.Text.Json;
 using System.IO;
+using MiniBot.Products;
+
+//andrey14scr@gmail.com 123
 
 namespace MiniBot.Activity
 {
-    class AssistantBot : IBot
+    class AssistantBot : IBot, IDisposable
     {
-        private enum MenuType : byte
-        {
-            Pizza,
-            Sushi,
-            Drink
-        }
         private class UserAccount
         {
             public string Login { get; set; }
             public string Password { get; set; }
             public string Name { get; set; }
+            public DateTime BirthDate { get; set; }
         }
 
-        //private DBWorker _dbWorker = new DBWorker(@"D:\GIT\MYFINALPROJECT\MINIBOT\MINIBOT\RESOURCERS\DBPRODUCTS.MDF");
+        private List<Product> _basket = new List<Product>();
+        private List<short> _listID = new List<short>();
+        private short _currentID = -1;
+        private Product _currentProduct;
+        private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\GIT\MyFinalProject\MiniBot\MiniBot\Resourcers\DBProducts.mdf;Integrated Security=True");
         private List<string> _choices = new List<string>();
         private UserAccount _account;
         private string _buffer;
         private static string _lastMessage;
-        private MenuType _menu;
+        private ProductType _currentType;
         public string BotName { get; private set; }
         public BotState State { get; private set; }
         public string Customer { get; private set; } = "Guest";
@@ -45,6 +47,14 @@ namespace MiniBot.Activity
             Indent = new String(' ', BotName.Length + 2);
         }
         #endregion
+
+        public void Start()
+        {
+            SendMessage($"Hello, I am {BotName} - your bot assistant, that can help you to take an order.\n" +
+                $"{Indent}If you have some questions, just enter \"{CommandHelp}\".\n" +
+                $"{Indent}If you want to exit, just enter \"{CommandExit}\" in any time.\n" +
+                $"{Indent}Answer something to start.", BotState.Start);
+        }
 
         #region Interface methods
         public void DoAction(string command)
@@ -78,6 +88,10 @@ namespace MiniBot.Activity
                 case BotState.Sleep:
                     ExitSystem();
                     break;
+                case BotState.Start:
+                    SendMessage("Well, to take an order you should have an account.\n" +
+                        $"{Indent}Do you want to register a new or you can log in the existing one?", BotState.AccountDecision);
+                    break;
                 case BotState.Write:
                     break;
                 case BotState.WriteAndWait:
@@ -85,8 +99,19 @@ namespace MiniBot.Activity
                 case BotState.AccName:
                     if (BackFromAccount(command))
                         break;
-                    _account.Name = command;
-                    Customer = Char.ToUpper(command[0]) + command.Substring(1);
+                    _account.Name = Char.ToUpper(command[0]) + command.Substring(1);
+                    Customer = _account.Name;
+                    break;
+                case BotState.AccBirthDate:
+                    if (BackFromAccount(command))
+                        break;
+                    string[] date = command.Split('.');
+                    int dd = 0, mm = 0, yy = 0;
+                    if (Int32.TryParse(date[0], out dd) && Int32.TryParse(date[1], out mm) && Int32.TryParse(date[2], out yy))
+                    {
+                        _account.BirthDate = new DateTime(yy, mm, dd);
+                    }
+                    Customer = _account.Name;
                     break;
                 case BotState.AccLogin:
                     if (BackFromAccount(command))
@@ -98,7 +123,6 @@ namespace MiniBot.Activity
                     }
                     _account.Login = command;
                     break;
-
                 case BotState.AccPassword:
                     if (BackFromAccount(command))
                         break;
@@ -128,7 +152,7 @@ namespace MiniBot.Activity
                     if (command.Contains(" ") && array.Length == 2)
                     {
                         if (FindAccount(array[0], array[1]))
-                            SendMessage($"Welcome, {Customer}!", BotState.Write);
+                            SendMessage($"Welcome, {Customer}! What do you want to order?", BotState.AskProduct);
                         else
                             SendMessage("Incorrect login or password! Try again. To come back enter \"back\"", BotState.FindAccount);
                     }
@@ -139,16 +163,53 @@ namespace MiniBot.Activity
                     switch (command.Substring(Indent.Length))
                     {
                         case ChoicePizza:
+                            _currentType = ProductType.Pizza;
                             SendMessage("Our menu:", BotState.ShowMenu);
-                            _menu = MenuType.Pizza;
                             break;
                         case ChoiceSushi:
+                            _currentType = ProductType.Sushi;
                             SendMessage("Our menu:", BotState.ShowMenu);
-                            _menu = MenuType.Sushi;
                             break;
                         case ChoiceDrink:
+                            _currentType = ProductType.Drink;
                             SendMessage("Our menu:", BotState.ShowMenu);
-                            _menu = MenuType.Drink;
+                            break;
+                    }
+                    break;
+                case BotState.ShowProduct:
+                    if (Equals(command.Substring(Indent.Length), ChoiceBack))
+                    {
+                        SendMessage("What do you want to order?", BotState.AskProduct);
+                        break;
+                    }
+                    WriteBotName(true);
+                    Console.WriteLine("Information:");
+                    switch (_currentType)
+                    {
+                        case ProductType.Pizza:
+                            _currentProduct = (Pizza)_dbWorker.GetById(_currentType, _currentID);
+                            (_currentProduct as Pizza).WriteInfo(Indent);
+                            break;
+                        case ProductType.Sushi:
+                            _currentProduct = (Sushi)_dbWorker.GetById(_currentType, _currentID);
+                            (_currentProduct as Sushi).WriteInfo(Indent);
+                            break;
+                        case ProductType.Drink:
+                            _currentProduct = (Drink)_dbWorker.GetById(_currentType, _currentID);
+                            (_currentProduct as Drink).WriteInfo(Indent);
+                            break;
+                    }
+                    SendMessage("Your decision", BotState.ProductDecision);
+                    break;
+                case BotState.ProductDecision:
+                    switch (command.Substring(Indent.Length))
+                    {
+                        case ChoiceBack:
+                            SendMessage("Our menu:", BotState.ShowMenu);
+                            break;
+                        case ChoiceTake:
+                            _basket.Add(_currentProduct);
+                            SendMessage("How many do you want?", BotState.AskAmount);
                             break;
                         default:
                             break;
@@ -164,27 +225,15 @@ namespace MiniBot.Activity
                 AddChoice(Indent + ChoiceCreate);
                 AddChoice(Indent + ChoiceExisting);
 
-                int index = ChoosePosition();
-                while (index < 0)
-                {
-                    index = ChoosePosition();
-                }
-                _buffer = _choices[index];
-                _choices.Clear();
+                MakeChoice();
             }
             else if (State == BotState.ShowMenu)
             {
-                switch (_menu)
-                {
-                    case MenuType.Pizza:
-                        break;
-                    case MenuType.Sushi:
-                        break;
-                    case MenuType.Drink:
-                        break;
-                    default:
-                        break;
-                }
+                _dbWorker.GetFromDB(ProductToString, _currentType);
+                AddChoice(Indent); 
+                AddChoice(Indent + ChoiceBack);
+                MakeChoice();
+                State = BotState.ShowProduct;
             }
             else if (State == BotState.AskProduct)
             {
@@ -192,13 +241,14 @@ namespace MiniBot.Activity
                 AddChoice(Indent + ChoiceSushi);
                 AddChoice(Indent + ChoiceDrink);
 
-                int index = ChoosePosition();
-                while (index < 0)
-                {
-                    index = ChoosePosition();
-                }
-                _buffer = _choices[index];
-                _choices.Clear();
+                MakeChoice();
+            }
+            else if (State == BotState.ProductDecision)
+            {
+                AddChoice(Indent + ChoiceTake);
+                AddChoice(Indent + ChoiceBack);
+
+                MakeChoice();
             }
             else if (State != BotState.Sleep && State != BotState.Write)
             {
@@ -213,6 +263,11 @@ namespace MiniBot.Activity
         {
             State = nextstate;
             SendMessage(msg);
+        }
+
+        public void Dispose()
+        {
+            
         }
         #endregion
 
@@ -270,11 +325,13 @@ namespace MiniBot.Activity
             if (State == BotState.AccountDecision)
             {
                 SendMessage("Enter your name, please", BotState.AccName);
+                SendMessage("Enter your birth date in format DD.MM.YYYY", BotState.AccBirthDate);
                 SendMessage("Enter your login, please", BotState.AccLogin);
                 SendMessage("Enter your password, please", BotState.AccPassword);
                 
-                SendMessage($"Hooray! Now you have an account and you can buy something.", BotState.Write);
+                SendMessage("Hooray! Now you have an account and you can buy something.", BotState.Write);
                 AddAccount(_account);
+                SendMessage("What do you want to order?", BotState.AskProduct);
             }
             else
             {
@@ -306,17 +363,24 @@ namespace MiniBot.Activity
 
                 if (cki.Key == ConsoleKey.DownArrow && sY - position.y - 1 <= _choices.Count && sY - position.y - 1 > 0)
                 {
+                    if (_choices[temp + 1] != null && Equals(_choices[temp + 1], Indent))
+                        position.y++;
                     Console.SetCursorPosition(position.x, position.y + 1);
                 }
                 else if (cki.Key == ConsoleKey.UpArrow && sY - position.y + 1 <= _choices.Count && sY - position.y + 1 > 0)
                 {
+                    if (_choices[temp - 1] != null && Equals(_choices[temp - 1], Indent))
+                        position.y--;
                     Console.SetCursorPosition(position.x, position.y - 1);
                 }
                 else if (cki.Key == ConsoleKey.Enter)
                 {
-                    result = temp;
-                    Console.SetCursorPosition(sX, sY);
-                    break;
+                    if (!Equals(_choices[temp], Indent))
+                    {
+                        result = temp;
+                        Console.SetCursorPosition(sX, sY);
+                        break;
+                    }
                 }
                 else if (cki.Key == ConsoleKey.Escape)
                 {
@@ -361,6 +425,30 @@ namespace MiniBot.Activity
                 return true;
             }
             return false;
+        }
+
+        private void ProductToString(Product p, short id)
+        {
+            AddChoice(Indent + p.ToString());
+            _listID.Add(id);
+        }
+
+        private void MakeChoice()
+        {
+            int index = ChoosePosition();
+            while (index < 0)
+            {
+                index = ChoosePosition();
+            }
+            _buffer = _choices[index];
+
+            WriteBotName(false);
+            if (State == BotState.ShowMenu && index < _listID.Count)
+                _currentID = _listID[index];
+
+            Console.WriteLine(_choices[index].Substring(Indent.Length));
+
+            _choices.Clear();
         }
         #endregion
 

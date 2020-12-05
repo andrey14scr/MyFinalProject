@@ -14,24 +14,24 @@ namespace MiniBot.Products
             Size = size;
         }
 
-        private string GetInfo()
+        private string GetInfo(string space)
         {
-            string info = !String.Equals(Description, String.Empty) ? $"Description: {Description}\n" : "";
+            string info = !String.Equals(Description, String.Empty) ? $"{space}Description: {Description}\n" : "";
 
-            return $"Price: {Cost:$0.00}\n" +
-                $"Size: {Size}sm\n" +
-                $"Weight: {Weight}g\n" +
+            return $"{space}Price: {Cost:$0.00}\n" +
+                $"{space}Size: {Size}sm\n" +
+                $"{space}Weight: {Weight}g\n" +
                 info +
-                $"Ingredients: {this.GetComposition()}\n" +
-                $"Rating: {(float)Score / 2:0.0}*";
+                $"{space}Ingredients: {this.GetComposition()}\n" +
+                $"{space}Rating: {(float)Score / 2:0.0}*";
         }
 
-        public void WriteInfo()
+        public void WriteInfo(string space)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"{Name} ");
+            Console.WriteLine($"{space}{Name} ");
             Console.ResetColor();
-            Console.WriteLine(GetInfo());
+            Console.WriteLine(GetInfo(space));
         }
     }
 }

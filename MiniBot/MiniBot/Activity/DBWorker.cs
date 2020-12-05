@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static MiniBot.Activity.Sources;
 
 namespace MiniBot.Activity
 {
@@ -112,31 +113,119 @@ namespace MiniBot.Activity
             }
         }
 
-        public object GetFromDB()
+        public void GetFromDB(Action<Product, short> action, ProductType producttype)
         {
-            /*
-            int res = 0;
-            using (SqlConnection connection = new SqlConnection(MainConnectionString))
+            string table = "";
+            switch (producttype)
             {
-                try
+                case ProductType.Pizza:
+                    table = "PizzaTable";
+                    break;
+                case ProductType.Sushi:
+                    table = "SushiTable";
+                    break;
+                case ProductType.Drink:
+                    table = "DrinkTable";
+                    break;
+            }
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                string sqlExpression = $"SELECT * FROM {table}";
+                using (SqlCommand command = new SqlCommand(sqlExpression, connection))
                 {
-                    connection.Open();
-                    string sqlExpression = "SELECT Id FROM " + Properties.Resources.appDBTableName + " WHERE Id=(SELECT max(Id) FROM " + Properties.Resources.appDBTableName + ");";
-                    using (SqlCommand command = new SqlCommand(sqlExpression, connection))
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    if (reader.HasRows)
                     {
-                        command.ExecuteNonQuery();
-                        object o = command.ExecuteScalar();
-                        if (o != null)
-                            res = (int)o;
+                        while (reader.Read())
+                        {
+                            switch (producttype)
+                            {
+                                case ProductType.Pizza:
+                                    Pizza pizza = new Pizza((string)reader["Name"], (float)reader["Cost"], 
+                                        (byte)reader["Score"], (string)reader["Description"],
+                                        ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (byte)reader["Size"]);
+                                    pizza.Discount = (byte)reader["Discount"];
+                                    action(pizza, (short)(int)reader["Id"]);
+                                    break;
+                                case ProductType.Sushi:
+                                    Sushi sushi = new Sushi((string)reader["Name"], (float)reader["Cost"],
+                                        (byte)reader["Score"], (string)reader["Description"],
+                                        ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (bool)reader["IsRaw"]);
+                                    sushi.Discount = (byte)reader["Discount"];
+                                    action(sushi, (short)(int)reader["Id"]);
+                                    break;
+                                case ProductType.Drink:
+                                    Drink drink = new Drink((string)reader["Name"], (float)reader["Cost"], 
+                                        (byte)reader["Score"], (string)reader["Description"],
+                                        (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
+                                    drink.Discount = (byte)reader["Discount"];
+                                    action(drink, (short)(int)reader["Id"]);
+                                    break;
+                            }
+                        }
                     }
-                }
-                catch (SqlException ex)
-                {
-                    MessageBox.Show(ex.Message + "\n Id value is damaged, do not change notes!");
+
+                    reader.Close();
                 }
             }
-            */
-            return null;
+
+            GC.Collect();
+        }
+
+        public object GetById(ProductType producttype, short id)
+        {
+            Product result = null;
+
+            string table = "";
+            switch (producttype)
+            {
+                case ProductType.Pizza:
+                    table = "PizzaTable";
+                    break;
+                case ProductType.Sushi:
+                    table = "SushiTable";
+                    break;
+                case ProductType.Drink:
+                    table = "DrinkTable";
+                    break;
+            }
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                string sqlExpression = $"SELECT * FROM {table} WHERE Id={id}";
+                using (SqlCommand command = new SqlCommand(sqlExpression, connection))
+                {
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.HasRows && reader.Read())
+                    {
+                        switch (producttype)
+                        {
+                            case ProductType.Pizza:
+                                result = new Pizza((string)reader["Name"], (float)reader["Cost"],
+                                    (byte)reader["Score"], (string)reader["Description"],
+                                    ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (byte)reader["Size"]);
+                                break;
+                            case ProductType.Sushi:
+                                result = new Sushi((string)reader["Name"], (float)reader["Cost"],
+                                    (byte)reader["Score"], (string)reader["Description"],
+                                    ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (bool)reader["IsRaw"]);
+                                break;
+                            case ProductType.Drink:
+                                result = new Drink((string)reader["Name"], (float)reader["Cost"],
+                                    (byte)reader["Score"], (string)reader["Description"],
+                                    (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
+                                break;
+                        }
+                        result.Discount = (byte)reader["Discount"];
+                    }
+                }
+            }
+
+            return result;
         }
 
         public void RemoveFromDB(object product)
