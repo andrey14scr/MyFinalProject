@@ -25,6 +25,8 @@ namespace MiniBot.Activity
             ShowProduct,
             ProductDecision,
             AskAmount,
+            ShowBasket,
+            Confirm,
         }
 
         public enum ProductType : byte
@@ -40,6 +42,7 @@ namespace MiniBot.Activity
         public const string CommandExit = "-exit";
         //public const string CommandNew = "new";
         public const string CommandBack = "-back";
+        public const string CommandAgree = "-agree";
 
         public const string ChoiceExisting = "->login";
         public const string ChoiceCreate = "->register";
@@ -48,12 +51,17 @@ namespace MiniBot.Activity
         public const string ChoiceDrink = "->drink";
         public const string ChoiceBack = "->back";
         public const string ChoiceTake = "->take";
+        public const string ChoiceSeeBasket = "->see basket";
+        public const string ChoiceBuy = "->buy";
+
+        public const string AutoText = "AutoText";
 
         public static bool IsCommand(string command)
         {
             if (Equals(CommandHelp, command) ||
                 Equals(CommandBack, command) ||
-                Equals(CommandExit, command))
+                Equals(CommandExit, command) ||
+                Equals(CommandAgree, command))
             {
                 return true;
             }

@@ -23,7 +23,7 @@ namespace MiniBot.Activity
             public DateTime BirthDate { get; set; }
         }
 
-        private List<Product> _basket = new List<Product>();
+        private List<(Product product, byte amount)> _basket = new List<(Product product, byte amount)>();
         private List<short> _listID = new List<short>();
         private short _currentID = -1;
         private Product _currentProduct;
@@ -33,6 +33,7 @@ namespace MiniBot.Activity
         private string _buffer;
         private static string _lastMessage;
         private ProductType _currentType;
+        private bool _backToMenu;
         public string BotName { get; private set; }
         public BotState State { get; private set; }
         public string Customer { get; private set; } = "Guest";
@@ -174,12 +175,22 @@ namespace MiniBot.Activity
                             _currentType = ProductType.Drink;
                             SendMessage("Our menu:", BotState.ShowMenu);
                             break;
+                        case ChoiceSeeBasket:
+                            _backToMenu = false;
+                            SendMessage("Your basket:", BotState.ShowBasket);
+                            break;
                     }
                     break;
                 case BotState.ShowProduct:
                     if (Equals(command.Substring(Indent.Length), ChoiceBack))
                     {
                         SendMessage("What do you want to order?", BotState.AskProduct);
+                        break;
+                    }
+                    else if (Equals(command.Substring(Indent.Length), ChoiceSeeBasket))
+                    {
+                        _backToMenu = true;
+                        SendMessage("Your basket:", BotState.ShowBasket);
                         break;
                     }
                     WriteBotName(true);
@@ -208,10 +219,42 @@ namespace MiniBot.Activity
                             SendMessage("Our menu:", BotState.ShowMenu);
                             break;
                         case ChoiceTake:
-                            _basket.Add(_currentProduct);
                             SendMessage("How many do you want?", BotState.AskAmount);
                             break;
+                    }
+                    break;
+                case BotState.AskAmount:
+                    State = BotState.ShowMenu;
+                    GetAnswer();
+                    break;
+                case BotState.ShowBasket:
+                    switch (command.Substring(Indent.Length))
+                    {
+                        case ChoiceBack:
+                            if (_backToMenu)
+                                SendMessage("Our menu:", BotState.ShowMenu);
+                            else
+                                SendMessage("What do you want to order?", BotState.AskProduct);
+                            break;
+                        case ChoiceBuy:
+                            SendMessage($"The total price is {TotalPrice():$0.00}. Enter \"-agree\" to confirm order.", BotState.Confirm);
+                            break;
+                    }
+                    break;
+                case BotState.Confirm:
+                    switch (command)
+                    {
+                        case CommandAgree:
+                            SendMessage("Thank you", BotState.Sleep);
+                            break;
+                        case CommandBack:
+                            SendMessage("Your basket:", BotState.ShowBasket);
+                            break;
+                        case CommandExit:
+                            ExitSystem();
+                            break;
                         default:
+                            SendMessage("I don't understand you :(", BotState.Confirm);
                             break;
                     }
                     break;
@@ -227,21 +270,29 @@ namespace MiniBot.Activity
 
                 MakeChoice();
             }
-            else if (State == BotState.ShowMenu)
-            {
-                _dbWorker.GetFromDB(ProductToString, _currentType);
-                AddChoice(Indent); 
-                AddChoice(Indent + ChoiceBack);
-                MakeChoice();
-                State = BotState.ShowProduct;
-            }
             else if (State == BotState.AskProduct)
             {
                 AddChoice(Indent + ChoicePizza);
                 AddChoice(Indent + ChoiceSushi);
                 AddChoice(Indent + ChoiceDrink);
+                if (_basket.Count > 0)
+                {
+                    AddChoice(Indent);
+                    AddChoice(Indent + ChoiceSeeBasket);
+                }
 
                 MakeChoice();
+            }
+            else if (State == BotState.ShowMenu)
+            {
+                _dbWorker.GetFromDB(ProductToString, _currentType);
+                AddChoice(Indent); 
+                AddChoice(Indent + ChoiceBack);
+                if (_basket.Count > 0)
+                    AddChoice(Indent + ChoiceSeeBasket);
+
+                MakeChoice();
+                State = BotState.ShowProduct;
             }
             else if (State == BotState.ProductDecision)
             {
@@ -250,10 +301,24 @@ namespace MiniBot.Activity
 
                 MakeChoice();
             }
+            else if (State == BotState.ShowBasket)
+            {
+                foreach (var item in _basket)
+                {
+                    AddChoice(Indent + item.amount + "x " + item.product.ToString());
+                }
+                AddChoice(Indent);
+                AddChoice(Indent + ChoiceBack);
+                AddChoice(Indent + ChoiceBuy);
+
+                MakeChoice();
+            }
             else if (State != BotState.Sleep && State != BotState.Write)
             {
                 WriteBotName(false);
                 _buffer = Console.ReadLine();
+                if (State == BotState.AskAmount)
+                    _basket.Add((_currentProduct, Convert.ToByte(_buffer)));
             }
 
             DoAction(_buffer);
@@ -261,6 +326,48 @@ namespace MiniBot.Activity
 
         public void SendMessage(string msg, BotState nextstate)
         {
+            if (Equals(msg, AutoText))
+            {
+                switch (nextstate)
+                {
+                    case BotState.Sleep:
+                        break;
+                    case BotState.Start:
+                        break;
+                    case BotState.Write:
+                        break;
+                    case BotState.WriteAndWait:
+                        break;
+                    case BotState.AccName:
+                        break;
+                    case BotState.AccBirthDate:
+                        break;
+                    case BotState.AccLogin:
+                        break;
+                    case BotState.AccPassword:
+                        break;
+                    case BotState.AccountDecision:
+                        break;
+                    case BotState.FindAccount:
+                        break;
+                    case BotState.ShowMenu:
+                        break;
+                    case BotState.AskProduct:
+                        break;
+                    case BotState.ShowProduct:
+                        break;
+                    case BotState.ProductDecision:
+                        break;
+                    case BotState.AskAmount:
+                        break;
+                    case BotState.ShowBasket:
+                        break;
+                    case BotState.Confirm:
+                        break;
+                    default:
+                        break;
+                }
+            }
             State = nextstate;
             SendMessage(msg);
         }
@@ -445,10 +552,22 @@ namespace MiniBot.Activity
             WriteBotName(false);
             if (State == BotState.ShowMenu && index < _listID.Count)
                 _currentID = _listID[index];
-
+            _listID.Clear();
+            
             Console.WriteLine(_choices[index].Substring(Indent.Length));
 
             _choices.Clear();
+        }
+
+        private float TotalPrice()
+        {
+            float price = 0.0f;
+            foreach (var item in _basket)
+            {
+                price += item.product.Cost * item.amount;
+            }
+
+            return price;
         }
         #endregion
 
