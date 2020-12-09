@@ -36,6 +36,8 @@ namespace MiniBot.Activity
             Drink
         }
 
+        public static bool HasAccounts { get; set; }
+
         public const string CommandHelp = "-help";
         //public const string CommandYes = "yes";
         //public const string CommandNo = "no";
@@ -44,8 +46,8 @@ namespace MiniBot.Activity
         public const string CommandBack = "-back";
         public const string CommandAgree = "-agree";
 
-        public const string ChoiceExisting = "->login";
-        public const string ChoiceCreate = "->register";
+        public const string ChoiceLogin = "->login";
+        public const string ChoiceRegister = "->register";
         public const string ChoicePizza = "->pizza";
         public const string ChoiceSushi = "->sushi";
         public const string ChoiceDrink = "->drink";

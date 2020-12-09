@@ -46,6 +46,7 @@ namespace MiniBot.Activity
         {
             BotName = botname;
             Indent = new String(' ', BotName.Length + 2);
+            CheckJson();
         }
         #endregion
 
@@ -90,8 +91,17 @@ namespace MiniBot.Activity
                     ExitSystem();
                     break;
                 case BotState.Start:
-                    SendMessage("Well, to take an order you should have an account.\n" +
+                    if (HasAccounts)
+                    {
+                        SendMessage("Well, to take an order you should have an account.\n" +
                         $"{Indent}Do you want to register a new or you can log in the existing one?", BotState.AccountDecision);
+                    }
+                    else
+                    {
+                        SendMessage("Well, to take an order you should have an account. Let's create it.", BotState.Write);
+                        State = BotState.AccountDecision;
+                        CreateAccount();
+                    }
                     break;
                 case BotState.Write:
                     break;
@@ -107,10 +117,28 @@ namespace MiniBot.Activity
                     if (BackFromAccount(command))
                         break;
                     string[] date = command.Split('.');
+                    if (date.ToList().Count != 3)
+                    {
+                        SendMessage("Format is DD.MM.YYYY", BotState.AccBirthDate); 
+                        break;
+                    }
                     int dd = 0, mm = 0, yy = 0;
                     if (Int32.TryParse(date[0], out dd) && Int32.TryParse(date[1], out mm) && Int32.TryParse(date[2], out yy))
                     {
-                        _account.BirthDate = new DateTime(yy, mm, dd);
+                        try
+                        {
+                            _account.BirthDate = new DateTime(yy, mm, dd);
+                        }
+                        catch (Exception ex)
+                        {
+                            SendMessage(ex.Message + " Try again.", BotState.AccBirthDate);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        SendMessage("Format is DD.MM.YYYY", BotState.AccBirthDate);
+                        break;
                     }
                     Customer = _account.Name;
                     break;
@@ -133,12 +161,12 @@ namespace MiniBot.Activity
                     State = BotState.Write;
                     if (BackFromAccount(command))
                         break;
-                    if (Equals(command.Substring(Indent.Length), ChoiceCreate))
+                    if (Equals(command.Substring(Indent.Length), ChoiceRegister))
                     {
                         State = BotState.AccountDecision;
                         CreateAccount();
                     }
-                    else if (Equals(command.Substring(Indent.Length), ChoiceExisting))
+                    else if (Equals(command.Substring(Indent.Length), ChoiceLogin))
                     {
                         State = BotState.FindAccount;
                         SendMessage("Enter your login and password through a whitespace", BotState.FindAccount);
@@ -265,9 +293,7 @@ namespace MiniBot.Activity
         {
             if (State == BotState.AccountDecision)
             {
-                AddChoice(Indent + ChoiceCreate);
-                AddChoice(Indent + ChoiceExisting);
-
+                AddChoice(Indent + ChoiceRegister);
                 MakeChoice();
             }
             else if (State == BotState.AskProduct)
@@ -368,6 +394,7 @@ namespace MiniBot.Activity
                         break;
                 }
             }
+
             State = nextstate;
             SendMessage(msg);
         }
@@ -378,7 +405,7 @@ namespace MiniBot.Activity
         }
         #endregion
 
-        #region Private methods area
+        #region Private methods
         private void SendMessage(string msg)
         {
             WriteBotName(true);
@@ -574,6 +601,8 @@ namespace MiniBot.Activity
         #region Json Working
         private async void AddAccount(UserAccount account)
         {
+            CheckJson();
+
             using (FileStream fs = new FileStream("Resources\\accounts.json", FileMode.OpenOrCreate))
             {
                 List<UserAccount> accountsList = new List<UserAccount>();
@@ -587,6 +616,8 @@ namespace MiniBot.Activity
 
         private bool FindAccount(string login, string password)
         {
+            CheckJson();
+
             List<UserAccount> accountsArray;
             using (StreamReader sr = new StreamReader("Resources\\accounts.json"))
             {
@@ -599,6 +630,24 @@ namespace MiniBot.Activity
                 return true;
             }
             return false;
+        }
+
+        private void CheckJson()
+        {
+            Sources.HasAccounts = false;
+            if (!Directory.Exists("Resources"))
+            {
+                Directory.CreateDirectory("Resources");
+                File.Create("Resources\\accounts.json");
+            }
+            else if (!File.Exists("Resources\\accounts.json"))
+            {
+                File.Create("Resources\\accounts.json");
+            }
+            else if (File.ReadAllText("Resources\\accounts.json") != String.Empty)
+            {
+                Sources.HasAccounts = true;
+            }
         }
         #endregion
     }
