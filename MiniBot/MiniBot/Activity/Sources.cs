@@ -36,8 +36,6 @@ namespace MiniBot.Activity
             Drink
         }
 
-        public static bool HasAccounts { get; set; }
-
         public const string CommandHelp = "-help";
         //public const string CommandYes = "yes";
         //public const string CommandNo = "no";

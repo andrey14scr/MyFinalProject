@@ -23,6 +23,7 @@ namespace MiniBot.Activity
             public DateTime BirthDate { get; set; }
         }
 
+        private static bool _hasAccounts;
         private List<(Product product, byte amount)> _basket = new List<(Product product, byte amount)>();
         private List<short> _listID = new List<short>();
         private short _currentID = -1;
@@ -34,6 +35,7 @@ namespace MiniBot.Activity
         private static string _lastMessage;
         private ProductType _currentType;
         private bool _backToMenu;
+
         public string BotName { get; private set; }
         public BotState State { get; private set; }
         public string Customer { get; private set; } = "Guest";
@@ -91,7 +93,7 @@ namespace MiniBot.Activity
                     ExitSystem();
                     break;
                 case BotState.Start:
-                    if (HasAccounts)
+                    if (_hasAccounts)
                     {
                         SendMessage("Well, to take an order you should have an account.\n" +
                         $"{Indent}Do you want to register a new or you can log in the existing one?", BotState.AccountDecision);
@@ -634,7 +636,7 @@ namespace MiniBot.Activity
 
         private void CheckJson()
         {
-            Sources.HasAccounts = false;
+            _hasAccounts = false;
             if (!Directory.Exists("Resources"))
             {
                 Directory.CreateDirectory("Resources");
@@ -646,7 +648,7 @@ namespace MiniBot.Activity
             }
             else if (File.ReadAllText("Resources\\accounts.json") != String.Empty)
             {
-                Sources.HasAccounts = true;
+                _hasAccounts = true;
             }
         }
         #endregion
