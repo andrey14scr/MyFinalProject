@@ -5,15 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using static MiniBot.Activity.Sources;
-using System.Text.Json;
-using System.IO;
 using MiniBot.Products;
 
 //andrey14scr@gmail.com 123
 
 namespace MiniBot.Activity
 {
-    class AssistantBot : IBot, IDisposable
+    partial class AssistantBot : IBot
     {
         private class UserAccount
         {
@@ -23,23 +21,33 @@ namespace MiniBot.Activity
             public DateTime BirthDate { get; set; }
         }
 
-        private static bool _hasAccounts;
-        private List<(Product product, byte amount)> _basket = new List<(Product product, byte amount)>();
-        private List<short> _listID = new List<short>();
-        private short _currentID = -1;
-        private Product _currentProduct;
-        private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\GIT\MyFinalProject\MiniBot\MiniBot\Resourcers\DBProducts.mdf;Integrated Security=True");
-        private List<string> _choices = new List<string>();
-        private UserAccount _account;
-        private string _buffer;
+        #region Fields
         private static string _lastMessage;
-        private ProductType _currentType;
+
+        private static bool _hasAccounts;
         private bool _backToMenu;
 
+        private Basket<Product> _b = new Basket<Product>();
+        //private List<(Product product, byte amount)> _basket = new List<(Product product, byte amount)>();
+        private List<short> _listID = new List<short>();
+        private List<string> _choices = new List<string>();
+
+        private short _currentID = -1;
+
+        private string _buffer;
+
+        private Product _currentProduct;
+        private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\GIT\MyFinalProject\MiniBot\MiniBot\Resourcers\DBProducts.mdf;Integrated Security=True");
+        private UserAccount _account;
+        private ProductType _currentType;
+        #endregion
+
+        #region Properties
         public string BotName { get; private set; }
         public BotState State { get; private set; }
         public string Customer { get; private set; } = "Guest";
         public string Indent { get; private set; }
+        #endregion
 
         #region Ctors
         public AssistantBot() : this("Henry") { }
@@ -52,6 +60,7 @@ namespace MiniBot.Activity
         }
         #endregion
 
+        #region Interface methods
         public void Start()
         {
             SendMessage($"Hello, I am {BotName} - your bot assistant, that can help you to take an order.\n" +
@@ -60,7 +69,6 @@ namespace MiniBot.Activity
                 $"{Indent}Answer something to start.", BotState.Start);
         }
 
-        #region Interface methods
         public void DoAction(string command)
         {
             if (command.Length == 0)
@@ -68,18 +76,18 @@ namespace MiniBot.Activity
                 SendMessage("Please, enter something!");
                 return;
             }
+            
             command = command.ToLower();
 
             if (command[0] == '-' && !IsCommand(command))
             {
-                SendMessage("I don't know this command :(!");
+                SendMessage("I don't know this command :(");
                 return;
             }
 
             if (Equals(command, CommandExit))
-            {
                 ExitSystem();
-            }
+
             if (Equals(command, CommandHelp))
             {
                 WriteHelp();
@@ -229,15 +237,15 @@ namespace MiniBot.Activity
                     {
                         case ProductType.Pizza:
                             _currentProduct = (Pizza)_dbWorker.GetById(_currentType, _currentID);
-                            (_currentProduct as Pizza).WriteInfo(Indent);
+                            (_currentProduct as Pizza).ShowInfo(Indent);
                             break;
                         case ProductType.Sushi:
                             _currentProduct = (Sushi)_dbWorker.GetById(_currentType, _currentID);
-                            (_currentProduct as Sushi).WriteInfo(Indent);
+                            (_currentProduct as Sushi).ShowInfo(Indent);
                             break;
                         case ProductType.Drink:
                             _currentProduct = (Drink)_dbWorker.GetById(_currentType, _currentID);
-                            (_currentProduct as Drink).WriteInfo(Indent);
+                            (_currentProduct as Drink).ShowInfo(Indent);
                             break;
                     }
                     SendMessage("Your decision", BotState.ProductDecision);
@@ -254,6 +262,7 @@ namespace MiniBot.Activity
                     }
                     break;
                 case BotState.AskAmount:
+                    _b.Add(_currentProduct, Convert.ToInt16(_buffer));
                     State = BotState.ShowMenu;
                     GetAnswer();
                     break;
@@ -267,7 +276,7 @@ namespace MiniBot.Activity
                                 SendMessage("What do you want to order?", BotState.AskProduct);
                             break;
                         case ChoiceBuy:
-                            SendMessage($"The total price is {TotalPrice():$0.00}. Enter \"-agree\" to confirm order.", BotState.Confirm);
+                            SendMessage($"The total price is {_b.TotalPrice:$0.00}. Enter \"-agree\" to confirm order.", BotState.Confirm);
                             break;
                     }
                     break;
@@ -303,7 +312,7 @@ namespace MiniBot.Activity
                 AddChoice(Indent + ChoicePizza);
                 AddChoice(Indent + ChoiceSushi);
                 AddChoice(Indent + ChoiceDrink);
-                if (_basket.Count > 0)
+                if (_b.Count > 0)
                 {
                     AddChoice(Indent);
                     AddChoice(Indent + ChoiceSeeBasket);
@@ -316,7 +325,7 @@ namespace MiniBot.Activity
                 _dbWorker.GetFromDB(ProductToString, _currentType);
                 AddChoice(Indent); 
                 AddChoice(Indent + ChoiceBack);
-                if (_basket.Count > 0)
+                if (_b.Count > 0)
                     AddChoice(Indent + ChoiceSeeBasket);
 
                 MakeChoice();
@@ -331,9 +340,9 @@ namespace MiniBot.Activity
             }
             else if (State == BotState.ShowBasket)
             {
-                foreach (var item in _basket)
+                for (int i = 0; i < _b.Count; i++)
                 {
-                    AddChoice(Indent + item.amount + "x " + item.product.ToString());
+                    AddChoice(Indent + _b.GetItemInfo(i));
                 }
                 AddChoice(Indent);
                 AddChoice(Indent + ChoiceBack);
@@ -345,8 +354,6 @@ namespace MiniBot.Activity
             {
                 WriteBotName(false);
                 _buffer = Console.ReadLine();
-                if (State == BotState.AskAmount)
-                    _basket.Add((_currentProduct, Convert.ToByte(_buffer)));
             }
 
             DoAction(_buffer);
@@ -354,7 +361,7 @@ namespace MiniBot.Activity
 
         public void SendMessage(string msg, BotState nextstate)
         {
-            if (Equals(msg, AutoText))
+            if (msg == null)
             {
                 switch (nextstate)
                 {
@@ -400,11 +407,6 @@ namespace MiniBot.Activity
             State = nextstate;
             SendMessage(msg);
         }
-
-        public void Dispose()
-        {
-            
-        }
         #endregion
 
         #region Private methods
@@ -415,22 +417,6 @@ namespace MiniBot.Activity
             _lastMessage = msg;
 
             GetAnswer();
-        }
-
-        private void ExitSystem(int code = 0)
-        {
-            Console.Write("\nFinishing");
-
-            for (int i = 0; i < 3; i++)
-            {
-                Thread.Sleep(500);
-                Console.Write(".");
-            }
-
-            Console.WriteLine();
-            Thread.Sleep(500);
-
-            Environment.Exit(code);
         }
 
         private void WriteBotName(bool isbot)
@@ -445,6 +431,7 @@ namespace MiniBot.Activity
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.Write($"{Customer}: ");
             }
+
             Console.ResetColor();
         }
 
@@ -476,83 +463,6 @@ namespace MiniBot.Activity
             }
         }
 
-        private int ChoosePosition()
-        {
-            int result = -1;
-            (int x, int y) position;
-            position = Console.GetCursorPosition();
-            int sX = position.x;
-            int sY = position.y;
-
-            int temp = _choices.Count - 1;
-            Console.SetCursorPosition(position.x, --position.y);
-            Console.CursorVisible = false;
-            HighLight(_choices[_choices.Count - 1], ConsoleColor.DarkMagenta);
-
-            while (true)
-            {
-                var cki = Console.ReadKey(true);
-                if (temp >= 0 && temp < _choices.Count)
-                {
-                    HighLight(_choices[temp], ConsoleColor.White);
-                }
-
-                if (cki.Key == ConsoleKey.DownArrow && sY - position.y - 1 <= _choices.Count && sY - position.y - 1 > 0)
-                {
-                    if (_choices[temp + 1] != null && Equals(_choices[temp + 1], Indent))
-                        position.y++;
-                    Console.SetCursorPosition(position.x, position.y + 1);
-                }
-                else if (cki.Key == ConsoleKey.UpArrow && sY - position.y + 1 <= _choices.Count && sY - position.y + 1 > 0)
-                {
-                    if (_choices[temp - 1] != null && Equals(_choices[temp - 1], Indent))
-                        position.y--;
-                    Console.SetCursorPosition(position.x, position.y - 1);
-                }
-                else if (cki.Key == ConsoleKey.Enter)
-                {
-                    if (!Equals(_choices[temp], Indent))
-                    {
-                        result = temp;
-                        Console.SetCursorPosition(sX, sY);
-                        break;
-                    }
-                }
-                else if (cki.Key == ConsoleKey.Escape)
-                {
-                    Console.CursorVisible = true;
-                    Console.SetCursorPosition(sX, sY);
-                    return -1;
-                }
-
-                position = Console.GetCursorPosition();
-                temp = _choices.Count - sY + position.y;
-
-                if (temp >= 0 && temp < _choices.Count)
-                {
-                    HighLight(_choices[temp], ConsoleColor.DarkMagenta);
-                }
-            }
-
-            Console.CursorVisible = true;
-            return result;
-        }
-
-        private void HighLight(string msg, ConsoleColor cc)
-        {
-            Console.ForegroundColor = cc;
-            Console.Write("\r" + msg);
-            Console.ResetColor();
-        }
-
-        private void AddChoice(string answer)
-        {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(answer);
-            Console.ResetColor();
-            _choices.Add(answer);
-        }
-
         private bool BackFromAccount(string command)
         {
             if (Equals(command, CommandBack))
@@ -560,6 +470,7 @@ namespace MiniBot.Activity
                 SendMessage("Do you want to create a new account or you have the existing one?", BotState.AccountDecision);
                 return true;
             }
+
             return false;
         }
 
@@ -569,87 +480,20 @@ namespace MiniBot.Activity
             _listID.Add(id);
         }
 
-        private void MakeChoice()
+        private void ExitSystem(int code = 0)
         {
-            int index = ChoosePosition();
-            while (index < 0)
+            Console.Write("\nFinishing");
+
+            for (int i = 0; i < 3; i++)
             {
-                index = ChoosePosition();
-            }
-            _buffer = _choices[index];
-
-            WriteBotName(false);
-            if (State == BotState.ShowMenu && index < _listID.Count)
-                _currentID = _listID[index];
-            _listID.Clear();
-            
-            Console.WriteLine(_choices[index].Substring(Indent.Length));
-
-            _choices.Clear();
-        }
-
-        private float TotalPrice()
-        {
-            float price = 0.0f;
-            foreach (var item in _basket)
-            {
-                price += item.product.Cost * item.amount;
+                Thread.Sleep(500);
+                Console.Write(".");
             }
 
-            return price;
-        }
-        #endregion
+            Console.WriteLine();
+            Thread.Sleep(500);
 
-        #region Json Working
-        private async void AddAccount(UserAccount account)
-        {
-            CheckJson();
-
-            using (FileStream fs = new FileStream("Resources\\accounts.json", FileMode.OpenOrCreate))
-            {
-                List<UserAccount> accountsList = new List<UserAccount>();
-                if (fs.Length != 0)
-                    accountsList = await JsonSerializer.DeserializeAsync<List<UserAccount>>(fs);
-                accountsList.Add(account);
-                fs.SetLength(0);
-                await JsonSerializer.SerializeAsync<List<UserAccount>>(fs, accountsList);
-            }
-        }
-
-        private bool FindAccount(string login, string password)
-        {
-            CheckJson();
-
-            List<UserAccount> accountsArray;
-            using (StreamReader sr = new StreamReader("Resources\\accounts.json"))
-            {
-                accountsArray = JsonSerializer.Deserialize<List<UserAccount>>(sr.ReadToEnd());
-            }
-            UserAccount userAccount = accountsArray.Find(x => Equals(x.Login, login) && Equals(x.Password, password));
-            if (userAccount != null)
-            {
-                Customer = userAccount.Name;
-                return true;
-            }
-            return false;
-        }
-
-        private void CheckJson()
-        {
-            _hasAccounts = false;
-            if (!Directory.Exists("Resources"))
-            {
-                Directory.CreateDirectory("Resources");
-                File.Create("Resources\\accounts.json");
-            }
-            else if (!File.Exists("Resources\\accounts.json"))
-            {
-                File.Create("Resources\\accounts.json");
-            }
-            else if (File.ReadAllText("Resources\\accounts.json") != String.Empty)
-            {
-                _hasAccounts = true;
-            }
+            Environment.Exit(code);
         }
         #endregion
     }

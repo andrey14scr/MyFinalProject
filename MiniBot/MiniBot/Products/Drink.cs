@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MiniBot.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MiniBot.Products
 {
-    class Drink : Product
+    class Drink : Product, IShowInfo, IGetInfo
     {
         public float Volume { get; private set; }
         public bool HasGase { get; private set; }
@@ -19,23 +20,48 @@ namespace MiniBot.Products
             IsAlcohol = isalcohol;
         }
 
-        private string GetInfo(string space)
+        public string GetInfo(string space = "")
         {
-            string info = !String.Equals(Description, String.Empty) ? $"{space}Description: {Description}, " : space;
-            info += HasGase ? "with gase, " : "without gase, ";
-            info += IsAlcohol ? "alcoholic\n" : "no alcohol\n";
-            return $"{space}Volume: {Volume:0.0}L\n" +
-                $"{space}Price: {Cost:$0.00}\n" +
-                info +
-                $"{space}Rating: {(float)Score/2:0.0}*";
+            return Name + "\n" + GetInfoWithoutname();
         }
 
-        public void WriteInfo(string space)
+        public string GetShortInfo(string space = "")
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(space);
+            sb.Append(Name);
+            sb.Append($" {Cost:$0.00}");
+
+            return sb.ToString();
+        }
+
+        public override void ShowShortInfo(string space = "")
+        {
+            Console.WriteLine($"{space}{Name} {Cost:$0.00}");
+        }
+
+        public override void ShowInfo(string space = "")
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"{space}{Name} ");
+            Console.WriteLine($"{space}{Name}");
             Console.ResetColor();
-            Console.WriteLine(GetInfo(space));
+            Console.WriteLine(this.GetInfoWithoutname());
+        }
+
+        private string GetInfoWithoutname()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append($"Cost: {Cost:$0.00}\n");
+            if (!String.IsNullOrEmpty(Description))
+                sb.Append($"Description: {Description}\n");
+            sb.Append($"Volume: {Volume} g\n");
+            sb.Append(HasGase ? "With gase\n" : "Without gase\n");
+            sb.Append(IsAlcohol ? "Alcoholic\n" : "Not alcoholic\n");
+            sb.Append($"Score: {(float)Score / 2}*");
+
+            return sb.ToString();
         }
     }
 }

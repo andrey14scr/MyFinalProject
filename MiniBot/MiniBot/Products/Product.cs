@@ -1,10 +1,11 @@
-﻿using System;
+﻿using MiniBot.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace MiniBot.Products
 {
-    abstract class Product
+    abstract class Product : IProduct, IShowInfo
     {
         public float Cost { get; private set; }
         public string Name { get; private set; }
@@ -24,5 +25,9 @@ namespace MiniBot.Products
         {
             return $"{Name}: {Cost:$0.00}";
         }
+
+        abstract public void ShowShortInfo(string space = "");
+
+        abstract public void ShowInfo(string space = "");
     }
 }
