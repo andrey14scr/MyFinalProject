@@ -9,7 +9,7 @@ namespace MiniBot
         static void Main(string[] args)
         {
             AssistantBot bot = new AssistantBot();
-
+            /*
             string[] arr = { "meet", "cheese" };
             Pizza p1 = new Pizza("pizaa1", 1.50f, 1, "good one1", arr, 100, 11);
             Pizza p2 = new Pizza("pizaa2", 2.50f, 2, "good one2", arr, 200, 22);
@@ -23,13 +23,13 @@ namespace MiniBot
             bas.Add(s);
             bas.Add(p1, 2);
 
-            
+            Customer customer = new Customer();
 
             bas.ShowSummary();
-
+            */
             //p.ShowShortInfo();
 
-            //bot.Start();
+            bot.Start();
         }
     }
 }

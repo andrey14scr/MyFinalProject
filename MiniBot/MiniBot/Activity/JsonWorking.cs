@@ -38,7 +38,6 @@ namespace MiniBot.Activity
             UserAccount userAccount = accountsArray.Find(x => Equals(x.Login, login) && Equals(x.Password, password));
             if (userAccount != null)
             {
-                Customer = userAccount.Name;
                 return true;
             }
             return false;
