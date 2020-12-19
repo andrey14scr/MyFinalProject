@@ -21,24 +21,24 @@ namespace MiniBot.Activity
             public string Name { get; set; }
             public DateTime BirthDate { get; set; }
 
-            public delegate void CustomerHandler(string topic, string message);
+            public delegate void CustomerHandler(string email, string message);
             public event CustomerHandler OrderCompleted;
             public event CustomerHandler OrderDelivered;
             public event CustomerHandler OrderPaid;
 
             public void SendCompleted()
             {
-                OrderCompleted?.Invoke("Your order", "Order is completed!");
+                OrderCompleted?.Invoke(Login, "Order is completed!");
             }
 
             public void SendDelivered()
             {
-                OrderDelivered?.Invoke("Your order", "Order is delivered! Don't forget to take it.");
+                OrderDelivered?.Invoke(Login, "Order is delivered! Don't forget to take it.");
             }
 
             public void SendPaid()
             {
-                OrderPaid?.Invoke("Your order", "Order is paid! Thank you.");
+                OrderPaid?.Invoke(Login, "Order is paid! Thank you.");
             }
         }
 
@@ -540,27 +540,27 @@ namespace MiniBot.Activity
             _account.OrderPaid += OrderPaid;
         }
 
-        private static void OrderCompleted(string topic, string message)
+        private static void OrderCompleted(string email, string message)
         {
-            SendEmail(topic, message);
+            SendEmail(email, message);
         }
 
-        private static void OrderDelivered(string topic, string message)
+        private static void OrderDelivered(string email, string message)
         {
-            SendEmail(topic, message);
+            SendEmail(email, message);
         }
 
-        private static void OrderPaid(string topic, string message)
+        private static void OrderPaid(string email, string message)
         {
-            SendEmail(topic, message);
+            SendEmail(email, message);
         }
 
-        private static void SendEmail(string topic, string message)
+        private static void SendEmail(string email, string message)
         {
             try
             {
-                MailMessage mail = new MailMessage("Andrey14scr@yandex.ru", "andrey14scr@gmail.com");
-                mail.Subject = topic;
+                MailMessage mail = new MailMessage("Andrey14scr@yandex.ru", email);
+                mail.Subject = mailTitle;
                 mail.Body = message;
 
                 SmtpClient client = new SmtpClient("smtp.yandex.ru");

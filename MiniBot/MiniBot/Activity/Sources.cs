@@ -56,6 +56,8 @@ namespace MiniBot.Activity
 
         public const string AutoText = "AutoText";
 
+        public const string mailTitle = "Order";
+
         public static bool IsCommand(string command)
         {
             if (Equals(CommandHelp, command) ||
