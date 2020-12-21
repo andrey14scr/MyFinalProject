@@ -7,6 +7,8 @@ using System.Threading;
 using static MiniBot.Activity.Sources;
 using MiniBot.Products;
 using System.Net.Mail;
+using System.Diagnostics;
+using System.IO;
 
 //andrey14scr@gmail.com 123
 
@@ -58,7 +60,7 @@ namespace MiniBot.Activity
         private const string defaultString = null;
 
         private Product _currentProduct;
-        private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\GIT\MyFinalProject\MiniBot\MiniBot\Resourcers\DBProducts.mdf;Integrated Security=True");
+        private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=" + (new FileInfo(@"..\..\..\Resourcers\DBProducts.mdf")).FullName + ";Integrated Security=True");
         private UserAccount _account = new UserAccount { Name = "Guest" };
         private ProductType _currentType;
         #endregion

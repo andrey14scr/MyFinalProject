@@ -9,6 +9,9 @@ namespace MiniBot
         static void Main(string[] args)
         {
             AssistantBot bot = new AssistantBot();
+
+            //string s = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+
             /*
             string[] arr = { "meet", "cheese" };
             Pizza p1 = new Pizza("pizaa1", 1.50f, 1, "good one1", arr, 100, 11);
