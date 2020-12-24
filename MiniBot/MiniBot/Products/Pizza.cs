@@ -1,4 +1,5 @@
-﻿using MiniBot.Interfaces;
+﻿using MiniBot.Activity;
+using MiniBot.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,20 +43,21 @@ namespace MiniBot.Products
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"{space}{Name}");
             Console.ResetColor();
-            Console.WriteLine(this.GetInfoWithoutname());
+            Console.WriteLine(this.GetInfoWithoutname(space));
         }
 
-        private string GetInfoWithoutname()
+        private string GetInfoWithoutname(string space = "")
         {
             StringBuilder sb = new StringBuilder();
+            StringBuilderExtension.Space = space;
 
-            sb.Append($"Cost: {Cost:$0.00}\n");
+            sb.SpaceAppend($"Cost: {Cost:$0.00}\n");
             if (!String.IsNullOrEmpty(Description))
-                sb.Append($"Description: {Description}\n");
-            sb.Append($"Composition: {GetComposition()}\n");
-            sb.Append($"Weight: {Weight} g\n");
-            sb.Append($"Size: {Size} cm\n");
-            sb.Append($"Score: {(float)Score / 2}*");
+                sb.SpaceAppend($"Description: {Description}\n");
+            sb.SpaceAppend($"Composition: {GetComposition()}\n");
+            sb.SpaceAppend($"Weight: {Weight} g\n");
+            sb.SpaceAppend($"Size: {Size} cm\n");
+            sb.SpaceAppend($"Score: {(float)Score / 2}*");
 
             return sb.ToString();
         }

@@ -26,6 +26,7 @@ namespace MiniBot.Activity
             ProductDecision,
             AskAmount,
             ShowBasket,
+            ProductInBusket,
             Confirm,
         }
 
@@ -53,10 +54,17 @@ namespace MiniBot.Activity
         public const string ChoiceTake = "->take";
         public const string ChoiceSeeBasket = "->see basket";
         public const string ChoiceBuy = "->buy";
+        public const string ChoiceRemove = "->remove";
 
         public const string AutoText = "AutoText";
 
         public const string mailTitle = "Order";
+
+        public const string guestName = "Guest";
+
+        public const string pizzaTable = "PizzaTable";
+        public const string sushiTable = "SushiTable";
+        public const string drinkTable = "DrinkTable";
 
         public static bool IsCommand(string command)
         {

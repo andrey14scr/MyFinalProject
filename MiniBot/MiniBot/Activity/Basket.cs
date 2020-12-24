@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace MiniBot.Activity
 {
-    class Basket<T> : IEnumerator<(T, short)>, IEnumerable where T : IShowInfo, IProduct
+    class Basket<T> : IEnumerator<(T product, short id, short amount)>, IEnumerable where T : IShowInfo, IProduct
     {
-        private List<(T item, short amount)> _listOfItems = new List<(T item, short amount)>();
+        private List<(T item, short id, short amount)> _listOfItems = new List<(T item, short id, short amount)>();
 
         public float TotalPrice
         {
@@ -35,22 +35,22 @@ namespace MiniBot.Activity
             }
         }
 
-        public (T, short) Current => _listOfItems[_position];
+        public (T product, short id, short amount) Current => _listOfItems[_position];
 
         object IEnumerator.Current => _listOfItems[_position];
 
-        public void Add(T item, short amount = 1)
+        public void Add(T item, short id, short amount = 1)
         {
             int index = _listOfItems.FindIndex(x => x.item.Equals(item));
 
             if (index != -1)
             {
-                _listOfItems[index] = (_listOfItems[index].item, (short)(_listOfItems[index].amount + amount));
+                _listOfItems[index] = (_listOfItems[index].item, id, (short)(_listOfItems[index].amount + amount));
                 if (_listOfItems[index].amount == 0)
                     _listOfItems.RemoveAt(index);
             }
             else
-                _listOfItems.Add((item, amount));
+                _listOfItems.Add((item, id, amount));
         }
 
         public void Clear()
@@ -63,12 +63,17 @@ namespace MiniBot.Activity
             _listOfItems.RemoveAt(index);
         }
 
+        public void RemoveById(short id)
+        {
+            _listOfItems.RemoveAt(_listOfItems.FindIndex(a => a.id == id));
+        }
+
         public void Remove(T item, short amount = 1)
         {
             this.Add(item, (short)-amount);
         }
 
-        public (T, int) this[int index]
+        public (T product, short id, short amount) this[int index]
         {
             get
             {
@@ -76,13 +81,13 @@ namespace MiniBot.Activity
             }
             set
             {
-                _listOfItems[index] = ((T, short))value;
+                _listOfItems[index] = ((T, short, short))value;
             }
         }
 
-        public void Insert(int index, T item, short amount = 1)
+        public void Insert(int index, T item, short id, short amount = 1)
         {
-            _listOfItems.Insert(index, (item, amount));
+            _listOfItems.Insert(index, (item, id, amount));
         }
 
         public void ShowShortInfo()

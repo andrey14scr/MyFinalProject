@@ -1,6 +1,8 @@
 ﻿using MiniBot.Activity;
 using MiniBot.Products;
 using System;
+using System.Data.SqlClient;
+using System.IO;
 
 namespace MiniBot
 {

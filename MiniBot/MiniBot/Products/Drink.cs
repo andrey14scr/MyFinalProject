@@ -1,4 +1,5 @@
-﻿using MiniBot.Interfaces;
+﻿using MiniBot.Activity;
+using MiniBot.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,20 +47,21 @@ namespace MiniBot.Products
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"{space}{Name}");
             Console.ResetColor();
-            Console.WriteLine(this.GetInfoWithoutname());
+            Console.WriteLine(this.GetInfoWithoutname(space));
         }
 
-        private string GetInfoWithoutname()
+        private string GetInfoWithoutname(string space = "")
         {
             StringBuilder sb = new StringBuilder();
+            StringBuilderExtension.Space = space;
 
-            sb.Append($"Cost: {Cost:$0.00}\n");
+            sb.SpaceAppend($"Cost: {Cost:$0.00}\n");
             if (!String.IsNullOrEmpty(Description))
-                sb.Append($"Description: {Description}\n");
-            sb.Append($"Volume: {Volume} g\n");
-            sb.Append(HasGase ? "With gase\n" : "Without gase\n");
-            sb.Append(IsAlcohol ? "Alcoholic\n" : "Not alcoholic\n");
-            sb.Append($"Score: {(float)Score / 2}*");
+                sb.SpaceAppend($"Description: {Description}\n");
+            sb.SpaceAppend($"Volume: {Volume} g\n");
+            sb.SpaceAppend(HasGase ? "With gase\n" : "Without gase\n");
+            sb.SpaceAppend(IsAlcohol ? "Alcoholic\n" : "Not alcoholic\n");
+            sb.SpaceAppend($"Score: {(float)Score / 2}*");
 
             return sb.ToString();
         }

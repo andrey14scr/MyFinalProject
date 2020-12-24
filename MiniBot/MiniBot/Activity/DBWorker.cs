@@ -175,52 +175,46 @@ namespace MiniBot.Activity
             GC.Collect();
         }
 
-        public object GetById(ProductType producttype, short id)
+        public object GetById(short id)
         {
             Product result = null;
 
-            string table = "";
-            switch (producttype)
-            {
-                case ProductType.Pizza:
-                    table = "PizzaTable";
-                    break;
-                case ProductType.Sushi:
-                    table = "SushiTable";
-                    break;
-                case ProductType.Drink:
-                    table = "DrinkTable";
-                    break;
-            }
+            string[] tables = { pizzaTable, sushiTable, drinkTable };
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                string sqlExpression = $"SELECT * FROM {table} WHERE Id={id}";
-                using (SqlCommand command = new SqlCommand(sqlExpression, connection))
+
+                for (int i = 0; i < tables.Length; i++)
                 {
-                    SqlDataReader reader = command.ExecuteReader();
-                    if (reader.HasRows && reader.Read())
+                    string sqlExpression = $"SELECT * FROM {tables[i]} WHERE Id={id}";
+                    using (SqlCommand command = new SqlCommand(sqlExpression, connection))
                     {
-                        switch (producttype)
+                        SqlDataReader reader = command.ExecuteReader();
+                        if (reader.HasRows && reader.Read())
                         {
-                            case ProductType.Pizza:
-                                result = new Pizza((string)reader["Name"], (float)reader["Cost"],
-                                    (byte)reader["Score"], (string)reader["Description"],
-                                    ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (byte)reader["Size"]);
-                                break;
-                            case ProductType.Sushi:
-                                result = new Sushi((string)reader["Name"], (float)reader["Cost"],
-                                    (byte)reader["Score"], (string)reader["Description"],
-                                    ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (bool)reader["IsRaw"]);
-                                break;
-                            case ProductType.Drink:
-                                result = new Drink((string)reader["Name"], (float)reader["Cost"],
-                                    (byte)reader["Score"], (string)reader["Description"],
-                                    (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
-                                break;
+                            switch (tables[i])
+                            {
+                                case pizzaTable:
+                                    result = new Pizza((string)reader["Name"], (float)reader["Cost"],
+                                        (byte)reader["Score"], (string)reader["Description"],
+                                        ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (byte)reader["Size"]);
+                                    break;
+                                case sushiTable:
+                                    result = new Sushi((string)reader["Name"], (float)reader["Cost"],
+                                        (byte)reader["Score"], (string)reader["Description"],
+                                        ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (bool)reader["IsRaw"]);
+                                    break;
+                                case drinkTable:
+                                    result = new Drink((string)reader["Name"], (float)reader["Cost"],
+                                        (byte)reader["Score"], (string)reader["Description"],
+                                        (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
+                                    break;
+                            }
+                            result.Discount = (byte)reader["Discount"];
                         }
-                        result.Discount = (byte)reader["Discount"];
+
+                        reader.Close();
                     }
                 }
             }
