@@ -10,8 +10,12 @@ namespace MiniBot.Activity
 {
     partial class AssistantBot : IBot
     {
+        private string _delimiter = "-------------";
+
         private int ChoosePosition()
         {
+            string currentDelimiter = Indent + _delimiter;
+
             int result = -1;
             (int x, int y) position;
             position = Console.GetCursorPosition();
@@ -33,19 +37,19 @@ namespace MiniBot.Activity
 
                 if (cki.Key == ConsoleKey.DownArrow && sY - position.y - 1 <= _choices.Count && sY - position.y - 1 > 0)
                 {
-                    if (_choices[temp + 1] != null && Equals(_choices[temp + 1], Indent))
+                    if (_choices[temp + 1] != null && Equals(_choices[temp + 1], currentDelimiter))
                         position.y++;
                     Console.SetCursorPosition(position.x, position.y + 1);
                 }
                 else if (cki.Key == ConsoleKey.UpArrow && sY - position.y + 1 <= _choices.Count && sY - position.y + 1 > 0)
                 {
-                    if (_choices[temp - 1] != null && Equals(_choices[temp - 1], Indent))
+                    if (_choices[temp - 1] != null && Equals(_choices[temp - 1], currentDelimiter))
                         position.y--;
                     Console.SetCursorPosition(position.x, position.y - 1);
                 }
                 else if (cki.Key == ConsoleKey.Enter)
                 {
-                    if (!Equals(_choices[temp], Indent))
+                    if (!Equals(_choices[temp], currentDelimiter))
                     {
                         result = temp;
                         Console.SetCursorPosition(sX, sY);

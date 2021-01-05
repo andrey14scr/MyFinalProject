@@ -38,6 +38,7 @@ namespace MiniBot.Activity
             UserAccount userAccount = accountsArray.Find(x => Equals(x.Login, login) && Equals(x.Password, password));
             if (userAccount != null)
             {
+                _account = userAccount;
                 return true;
             }
             return false;

@@ -9,8 +9,6 @@ using MiniBot.Products;
 using System.Net.Mail;
 using System.IO;
 
-//andrey14scr@gmail.com 123
-
 namespace MiniBot.Activity
 {
     partial class AssistantBot : IBot
@@ -44,8 +42,6 @@ namespace MiniBot.Activity
         }
 
         #region Fields
-        private static string _lastMessage;
-
         private static bool _hasAccounts;
         private bool _backToMenu;
 
@@ -247,16 +243,32 @@ namespace MiniBot.Activity
                     }
                     break;
                 case BotState.ProductInBusket:
-                    if (Equals(command.Substring(Indent.Length), ChoiceRemove))
+                    switch (command.Substring(Indent.Length))
                     {
-                        _basket.RemoveById(_currentID);
+                        case ChoiceRemove:
+                            _basket.RemoveById(_currentID);
+                            SendMessage(defaultString, BotState.ShowBasket);
+                            break;
+                        case ChoiceReduce:
+                            _basket.Remove(_currentProduct, _currentID);
+                            SendMessage(defaultString, BotState.ProductInBusket);
+                            break;
+                        case ChoiceEnlarge:
+                            _basket.Add(_currentProduct, _currentID);
+                            SendMessage(defaultString, BotState.ProductInBusket);
+                            break;
+                        case ChoiceBack:
+                            SendMessage(defaultString, BotState.ShowBasket);
+                            break;
                     }
-                    SendMessage(defaultString, BotState.ShowBasket);
                     break;
                 case BotState.Confirm:
                     switch (command)
                     {
                         case CommandAgree:
+                            OrderCompleted(_account.Login, "Completed");
+                            OrderDelivered(_account.Login, "Delivered");
+                            OrderPaid(_account.Login, "Paid");
                             SendMessage(defaultString, BotState.Sleep);
                             break;
                         case CommandBack:
@@ -291,7 +303,7 @@ namespace MiniBot.Activity
                 AddChoice(Indent + ChoiceDrink);
                 if (_basket.Count > 0)
                 {
-                    AddChoice(Indent);
+                    AddChoice(Indent + _delimiter);
                     AddChoice(Indent + ChoiceSeeBasket);
                 }
 
@@ -300,7 +312,7 @@ namespace MiniBot.Activity
             else if (State == BotState.ShowMenu)
             {
                 _dbWorker.GetFromDB(ProductToString, _currentType);
-                AddChoice(Indent); 
+                AddChoice(Indent + _delimiter); 
                 AddChoice(Indent + ChoiceBack);
                 if (_basket.Count > 0)
                     AddChoice(Indent + ChoiceSeeBasket);
@@ -329,7 +341,7 @@ namespace MiniBot.Activity
                     }
                 }
 
-                AddChoice(Indent);
+                AddChoice(Indent + _delimiter);
                 AddChoice(Indent + ChoiceBack);
                 AddChoice(Indent + ChoiceBuy);
 
@@ -337,6 +349,10 @@ namespace MiniBot.Activity
             }
             else if (State == BotState.ProductInBusket)
             {
+                AddChoice(Indent + ChoiceEnlarge);
+                var item = _basket.GetById(_currentID);
+                if (item.amount > 0)
+                    AddChoice(Indent + ChoiceReduce);
                 AddChoice(Indent + ChoiceRemove);
                 AddChoice(Indent + ChoiceBack);
 
@@ -394,8 +410,10 @@ namespace MiniBot.Activity
                     case BotState.ShowProduct:
                         break;
                     case BotState.ProductDecision:
-                    case BotState.ProductInBusket:
                         msg = "Your decision";
+                        break;
+                    case BotState.ProductInBusket:
+                        msg = _basket.GetItemInfoById(_currentID);
                         break;
                     case BotState.AskAmount:
                         msg = "How many do you want?";
@@ -421,7 +439,6 @@ namespace MiniBot.Activity
         {
             WriteBotName(true);
             Console.WriteLine(msg);
-            _lastMessage = msg;
 
             GetAnswer();
         }

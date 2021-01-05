@@ -41,7 +41,7 @@ namespace MiniBot.Activity
 
         public void Add(T item, short id, short amount = 1)
         {
-            int index = _listOfItems.FindIndex(x => x.item.Equals(item));
+            int index = _listOfItems.FindIndex(x => x.id == id);
 
             if (index != -1)
             {
@@ -68,9 +68,14 @@ namespace MiniBot.Activity
             _listOfItems.RemoveAt(_listOfItems.FindIndex(a => a.id == id));
         }
 
-        public void Remove(T item, short amount = 1)
+        public (T item, short id, short amount) GetById(short id)
         {
-            this.Add(item, (short)-amount);
+            return _listOfItems.Find(a => a.id == id);
+        }
+
+        public void Remove(T item, short id, short amount = 1)
+        {
+            this.Add(item, id, (short)-amount);
         }
 
         public (T product, short id, short amount) this[int index]
@@ -109,6 +114,12 @@ namespace MiniBot.Activity
         public string GetItemInfo(int index)
         {
             return _listOfItems[index].item.Name + " x" + _listOfItems[index].amount + " = " + String.Format("${0:0.00}", _listOfItems[index].item.Cost * _listOfItems[index].amount);
+        }
+
+        public string GetItemInfoById(short id)
+        {
+            int index = _listOfItems.FindIndex(x => x.id == id);
+            return GetItemInfo(index);
         }
 
         public void ShowSummary(string space = "")
