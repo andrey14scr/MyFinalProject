@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Text.Json;
 
 namespace LogInfo
 {
@@ -13,24 +14,30 @@ namespace LogInfo
         File = 1
     }
 
-    public static class Logger
+    public class Logger
     {
-        private static int _counter = 0;
+        private int _counter = 0;
 
         private const string DBG = "DBG";
         private const string INF = "INF";
         private const string ERR = "ERR";
 
         private const string folderName = "Logs";
+        private const string settingsName = "settings.json";
 
         private const long maxFileSize = 30 * 1024;
 
-        public static Mode Mode { get; set; }
-        private static bool _isDebug;
-        private static bool _isInited = false;
+        public Mode Mode { get; set; }
+        private bool _isDebug;
+        private bool _isInited = false;
 
-        public static void Init()
+        public Logger()
         {
+            if (!Directory.Exists(folderName))
+            {
+                Directory.CreateDirectory(folderName);
+            }
+
             foreach (var attribute in Assembly.GetExecutingAssembly().GetCustomAttributes(false))
             {
                 var debuggableAttribute = attribute as DebuggableAttribute;
@@ -40,10 +47,18 @@ namespace LogInfo
                 }
             }
 
+            if (File.Exists(folderName + "\\" + settingsName)) 
+            {
+                using (StreamReader sr = new StreamReader(folderName + "\\" + settingsName))
+                {
+                    _counter = JsonSerializer.Deserialize<int>(sr.ReadToEnd());
+                }
+            }
+
             _isInited = true;
         }
 
-        public static void Info(string message)
+        public void Info(string message)
         {
             if (!_isInited)
                 throw new LogException("a");
@@ -51,7 +66,7 @@ namespace LogInfo
             Log(INF, message);
         }
 
-        public static void Debug(string message)
+        public void Debug(string message)
         {
             if (!_isInited)
                 throw new LogException("a");
@@ -60,7 +75,7 @@ namespace LogInfo
                 Log(DBG, message);
         }
 
-        public static void Error(string message)
+        public void Error(string message)
         {
             if (!_isInited)
                 throw new LogException("a");
@@ -68,7 +83,7 @@ namespace LogInfo
             Log(ERR, message);
         }
 
-        private static void Log(string mode, string message)
+        private void Log(string mode, string message)
         {
             StackTrace stackTrace = new StackTrace();
             
@@ -101,6 +116,11 @@ namespace LogInfo
                 else
                 {
                     _counter++;
+                    using (StreamWriter sw = new StreamWriter(folderName + "\\" + settingsName))
+                    {
+                        sw.Write(JsonSerializer.Serialize<int>(_counter));
+                    }
+
                     fileName = CreateFileName();
                     WriteInFile(fileName, content);
                 }
@@ -140,19 +160,14 @@ namespace LogInfo
             }
         }
 
-        private static string CreateFileName()
+        private string CreateFileName()
         {
             DateTime nowTime = DateTime.Now;
-            return folderName + "\\log_" + nowTime.Year + nowTime.Month + nowTime.Day + "_" + _counter + ".txt";
+            return folderName + "\\log_" + nowTime.Year + nowTime.Month + nowTime.Day + "_[" + _counter.ToString("0000") + "].txt";
         }
 
-        private static void WriteInFile(string path, string content)
+        private void WriteInFile(string path, string content)
         {
-            if (!Directory.Exists(folderName))
-            {
-                Directory.CreateDirectory(folderName);
-            }
-
             using (var sw = new StreamWriter(path, true))
             {
                 sw.WriteLine(content);
