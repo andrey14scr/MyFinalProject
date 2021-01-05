@@ -3,6 +3,9 @@ using MiniBot.Products;
 using System;
 using System.Data.SqlClient;
 using System.IO;
+using LogInfo;
+using System.Reflection;
+using System.Diagnostics;
 
 namespace MiniBot
 {

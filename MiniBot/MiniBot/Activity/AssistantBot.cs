@@ -8,6 +8,7 @@ using static MiniBot.Activity.Sources;
 using MiniBot.Products;
 using System.Net.Mail;
 using System.IO;
+using LogInfo;
 
 namespace MiniBot.Activity
 {
@@ -86,7 +87,7 @@ namespace MiniBot.Activity
 
         #region Interface methods
         public void Start()
-        { 
+        {
             SendMessage($"Hello, I am {BotName} - your bot assistant, that can help you to take an order.\n" +
                 $"{Indent}If you want to exit from the program in the time of input, just enter \"{CommandExit}\".\n" +
                 $"{Indent}Or \"{CommandBack}\" to back on one step ago.\n" +
@@ -451,12 +452,13 @@ namespace MiniBot.Activity
         #endregion
 
         #region Private methods
-        private void SendMessage(string msg)
+        private void SendMessage(string msg, bool isAuto = true)
         {
             WriteBotName(true);
             Console.WriteLine(msg);
 
-            GetAnswer();
+            if (isAuto)
+                GetAnswer();
         }
 
         private void WriteBotName(bool isbot)
