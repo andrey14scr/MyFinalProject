@@ -39,6 +39,13 @@ namespace MiniBot.Activity
             {
                 OrderPaid?.Invoke(Login, "Order is paid! Thank you.");
             }
+
+            public void Reset()
+            {
+                Name = guestName;
+                Login = Password = null;
+                BirthDate = DateTime.MinValue;
+            }
         }
 
         #region Fields
@@ -112,18 +119,20 @@ namespace MiniBot.Activity
                     break;
                 case BotState.AccountDecision:
                     State = BotState.Write;
-                    if (Equals(command.Substring(Indent.Length), ChoiceRegister))
+                    switch (command.Substring(Indent.Length))
                     {
-                        State = BotState.AccountDecision;
-                        CreateAccount();
-                    }
-                    else if (Equals(command.Substring(Indent.Length), ChoiceLogin))
-                    {
-                        State = BotState.FindAccount;
-                        SendMessage(defaultString, BotState.FindAccount);
-                    }
-                    else
-                        SendMessage("Sorry, I don't understand you :(", BotState.AccountDecision);
+                        case ChoiceRegister:
+                            State = BotState.AccountDecision;
+                            CreateAccount();
+                            break;
+                        case ChoiceLogin:
+                            State = BotState.FindAccount;
+                            SendMessage(defaultString, BotState.FindAccount);
+                            break;
+                        default:
+                            SendMessage("Sorry, I don't understand you :(", BotState.AccountDecision);
+                            break;
+                    }   
                     break;
                 case BotState.FindAccount:
                     if (BackFromAccount(_buffer))
@@ -164,38 +173,44 @@ namespace MiniBot.Activity
                             _backToMenu = false;
                             SendMessage(defaultString, BotState.ShowBasket);
                             break;
+                        case ChoiceExit:
+                            _backToMenu = false;
+                            _account.Reset();
+                            SendMessage(defaultString, BotState.AccountDecision);
+                            break;
                     }
                     break;
                 case BotState.ShowProduct:
-                    if (Equals(command.Substring(Indent.Length), ChoiceBack))
+                    switch (command.Substring(Indent.Length))
                     {
-                        SendMessage(defaultString, BotState.AskProduct);
-                        break;
-                    }
-                    else if (Equals(command.Substring(Indent.Length), ChoiceSeeBasket))
-                    {
-                        _backToMenu = true;
-                        SendMessage(defaultString, BotState.ShowBasket);
-                        break;
-                    }
-                    WriteBotName(true);
-                    Console.WriteLine("Information:");
-                    switch (_currentType)
-                    {
-                        case ProductType.Pizza:
-                            _currentProduct = (Pizza)_dbWorker.GetById(_currentID);
-                            (_currentProduct as Pizza).ShowInfo(Indent);
+                        case ChoiceBack:
+                            SendMessage(defaultString, BotState.AskProduct);
                             break;
-                        case ProductType.Sushi:
-                            _currentProduct = (Sushi)_dbWorker.GetById(_currentID);
-                            (_currentProduct as Sushi).ShowInfo(Indent);
+                        case ChoiceSeeBasket:
+                            _backToMenu = true;
+                            SendMessage(defaultString, BotState.ShowBasket);
                             break;
-                        case ProductType.Drink:
-                            _currentProduct = (Drink)_dbWorker.GetById(_currentID);
-                            (_currentProduct as Drink).ShowInfo(Indent);
+                        default:
+                            WriteBotName(true);
+                            Console.WriteLine("Information:");
+                            switch (_currentType)
+                            {
+                                case ProductType.Pizza:
+                                    _currentProduct = (Pizza)_dbWorker.GetById(_currentID);
+                                    (_currentProduct as Pizza).ShowInfo(Indent);
+                                    break;
+                                case ProductType.Sushi:
+                                    _currentProduct = (Sushi)_dbWorker.GetById(_currentID);
+                                    (_currentProduct as Sushi).ShowInfo(Indent);
+                                    break;
+                                case ProductType.Drink:
+                                    _currentProduct = (Drink)_dbWorker.GetById(_currentID);
+                                    (_currentProduct as Drink).ShowInfo(Indent);
+                                    break;
+                            }
+                            SendMessage(defaultString, BotState.ProductDecision);
                             break;
                     }
-                    SendMessage(defaultString, BotState.ProductDecision);
                     break;
                 case BotState.ProductDecision:
                     switch (command.Substring(Indent.Length))
@@ -301,11 +316,12 @@ namespace MiniBot.Activity
                 AddChoice(Indent + ChoicePizza);
                 AddChoice(Indent + ChoiceSushi);
                 AddChoice(Indent + ChoiceDrink);
+                AddChoice(Indent + _delimiter);
                 if (_basket.Count > 0)
                 {
-                    AddChoice(Indent + _delimiter);
                     AddChoice(Indent + ChoiceSeeBasket);
                 }
+                AddChoice(Indent + ChoiceExit);
 
                 MakeChoice();
             }

@@ -57,6 +57,7 @@ namespace MiniBot.Activity
         public const string ChoiceRemove = "->remove";
         public const string ChoiceReduce = "->reduce";
         public const string ChoiceEnlarge = "->enlarge";
+        public const string ChoiceExit = "->exit";
 
         public const string AutoText = "AutoText";
 
