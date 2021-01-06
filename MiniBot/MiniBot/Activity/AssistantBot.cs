@@ -14,17 +14,21 @@ namespace MiniBot.Activity
 {
     partial class AssistantBot : IBot
     {
-        private class UserAccount
+        private class UserAccount : IAccount
         {
-            public string Login { get; set; }
-            public string Password { get; set; }
             public string Name { get; set; }
             public DateTime BirthDate { get; set; }
+            public Basket<Product> Basket { get; private set; }
 
             public delegate void CustomerHandler(string email, string message);
             public event CustomerHandler OrderCompleted;
             public event CustomerHandler OrderDelivered;
             public event CustomerHandler OrderPaid;
+
+            public UserAccount()
+            {
+                Basket = new Basket<Product>();
+            }
 
             public void SendCompleted()
             {
@@ -41,10 +45,11 @@ namespace MiniBot.Activity
                 OrderPaid?.Invoke(Login, "Order is paid! Thank you.");
             }
 
-            public void Reset()
+            public void Exit()
             {
                 Name = guestName;
                 Login = Password = null;
+                Basket = null;
                 BirthDate = DateTime.MinValue;
             }
         }
@@ -53,7 +58,6 @@ namespace MiniBot.Activity
         private static bool _hasAccounts;
         private bool _backToMenu;
 
-        private Basket<Product> _basket = new Basket<Product>();
         private List<short> _listID = new List<short>();
         private List<string> _choices = new List<string>();
 
@@ -64,7 +68,8 @@ namespace MiniBot.Activity
 
         private Product _currentProduct;
         private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=" + (new FileInfo(@"..\..\..\Resourcers\DBProducts.mdf")).FullName + ";Integrated Security=True");
-        private UserAccount _account = new UserAccount { Name = guestName };
+        private UserAccount _account = new UserAccount() { Name = guestName };
+        private AccountWorker<UserAccount> accountWorker = new AccountWorker<UserAccount>("Resources", "accounts.json");
         private ProductType _currentType;
         #endregion
 
@@ -81,7 +86,7 @@ namespace MiniBot.Activity
         {
             BotName = botname;
             Indent = new String(' ', BotName.Length + 2);
-            CheckJson();
+            accountWorker.CheckJson();
         }
         #endregion
 
@@ -144,7 +149,7 @@ namespace MiniBot.Activity
                     string[] array = command.Split(' ');
                     if (command.Contains(" ") && array.Length == 2)
                     {
-                        if (FindAccount(array[0], array[1]))
+                        if (accountWorker.FindAccount(array[0], array[1], ref _account))
                         {
                             SendMessage($"Welcome, {_account.Name}! " + defaultString, BotState.AskProduct);
                             SubscribeAccount();
@@ -176,7 +181,8 @@ namespace MiniBot.Activity
                             break;
                         case ChoiceExit:
                             _backToMenu = false;
-                            _account.Reset();
+                            Save(_account);
+                            _account.Exit();
                             SendMessage(defaultString, BotState.AccountDecision);
                             break;
                     }
@@ -231,7 +237,7 @@ namespace MiniBot.Activity
                         SendMessage("Enter an integer number!");
                         break;
                     }
-                    _basket.Add(_currentProduct, _currentID , amount);
+                    _account.Basket.Add(_currentProduct, _currentID , amount);
                     State = BotState.ShowMenu;
                     GetAnswer();
                     break;
@@ -262,15 +268,15 @@ namespace MiniBot.Activity
                     switch (command.Substring(Indent.Length))
                     {
                         case ChoiceRemove:
-                            _basket.RemoveById(_currentID);
+                            _account.Basket.RemoveById(_currentID);
                             SendMessage(defaultString, BotState.ShowBasket);
                             break;
                         case ChoiceReduce:
-                            _basket.Remove(_currentProduct, _currentID);
+                            _account.Basket.Remove(_currentProduct, _currentID);
                             SendMessage(defaultString, BotState.ProductInBusket);
                             break;
                         case ChoiceEnlarge:
-                            _basket.Add(_currentProduct, _currentID);
+                            _account.Basket.Add(_currentProduct, _currentID);
                             SendMessage(defaultString, BotState.ProductInBusket);
                             break;
                         case ChoiceBack:
@@ -318,7 +324,7 @@ namespace MiniBot.Activity
                 AddChoice(Indent + ChoiceSushi);
                 AddChoice(Indent + ChoiceDrink);
                 AddChoice(Indent + _delimiter);
-                if (_basket.Count > 0)
+                if (_account.Basket.Count > 0)
                 {
                     AddChoice(Indent + ChoiceSeeBasket);
                 }
@@ -331,7 +337,7 @@ namespace MiniBot.Activity
                 _dbWorker.GetFromDB(ProductToString, _currentType);
                 AddChoice(Indent + _delimiter); 
                 AddChoice(Indent + ChoiceBack);
-                if (_basket.Count > 0)
+                if (_account.Basket.Count > 0)
                     AddChoice(Indent + ChoiceSeeBasket);
 
                 MakeChoice();
@@ -346,15 +352,15 @@ namespace MiniBot.Activity
             }
             else if (State == BotState.ShowBasket)
             {
-                if (_basket.Count == 0)
+                if (_account.Basket.Count == 0)
                 {
                     Console.WriteLine(Indent + "<Empty>");
                 }
                 else
                 {
-                    for (int i = 0; i < _basket.Count; i++)
+                    for (int i = 0; i < _account.Basket.Count; i++)
                     {
-                        AddChoice(Indent + _basket.GetItemInfo(i));
+                        AddChoice(Indent + _account.Basket.GetItemInfo(i));
                     }
                 }
 
@@ -367,7 +373,7 @@ namespace MiniBot.Activity
             else if (State == BotState.ProductInBusket)
             {
                 AddChoice(Indent + ChoiceEnlarge);
-                var item = _basket.GetById(_currentID);
+                var item = _account.Basket.GetById(_currentID);
                 if (item.amount > 0)
                     AddChoice(Indent + ChoiceReduce);
                 AddChoice(Indent + ChoiceRemove);
@@ -430,7 +436,7 @@ namespace MiniBot.Activity
                         msg = "Your decision";
                         break;
                     case BotState.ProductInBusket:
-                        msg = _basket.GetItemInfoById(_currentID);
+                        msg = _account.Basket.GetItemInfoById(_currentID);
                         break;
                     case BotState.AskAmount:
                         msg = "How many do you want?";
@@ -439,7 +445,7 @@ namespace MiniBot.Activity
                         msg = "Your basket:";
                         break;
                     case BotState.Confirm:
-                        msg = $"The total price is {_basket.TotalPrice:$0.00}. Enter \"-agree\" to confirm order.";
+                        msg = $"The total price is {_account.Basket.TotalPrice:$0.00}. Enter \"-agree\" to confirm order.";
                         break;
                     default:
                         break;
@@ -557,7 +563,7 @@ namespace MiniBot.Activity
                 _account.Password = _buffer;
 
                 SendMessage("Hooray! Now you have an account and you can buy something.", BotState.Write);
-                AddAccount(_account);
+                accountWorker.AddAccount(_account);
 
                 SubscribeAccount();
 
@@ -607,6 +613,18 @@ namespace MiniBot.Activity
         {
             AddChoice(Indent + p.ToString());
             _listID.Add(id);
+        }
+
+        private void Save(UserAccount account)
+        {
+            if (!accountWorker.FindAccount(account.Login, account.Password, ref account))
+            {
+                accountWorker.AddAccount(account);
+            }
+            else
+            {
+                accountWorker.UpdateAccount(account);
+            }
         }
 
         private void ExitSystem(int code = 0)

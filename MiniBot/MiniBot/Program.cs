@@ -14,15 +14,9 @@ namespace MiniBot
         static void Main(string[] args)
         {
             AssistantBot bot = new AssistantBot();
-
+            Math.Abs(3);
             Logger logger = new Logger();
             logger.Mode = Mode.File;
-
-            for (int i = 0; i < 500; i++)
-            {
-                logger.Error("some errorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
-            }
-
 
             //string s = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
 
@@ -46,7 +40,7 @@ namespace MiniBot
             */
             //p.ShowShortInfo();
 
-            //bot.Start();
+            bot.Start();
         }
     }
 }

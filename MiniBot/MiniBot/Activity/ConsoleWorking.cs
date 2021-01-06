@@ -103,8 +103,8 @@ namespace MiniBot.Activity
             WriteBotName(false);
             if (State == BotState.ShowMenu && index < _listID.Count)
                 _currentID = _listID[index];
-            else if (State == BotState.ShowBasket && index < _basket.Count)
-                _currentID = _basket[index].id;
+            else if (State == BotState.ShowBasket && index < _account.Basket.Count)
+                _currentID = _account.Basket[index].id;
             _listID.Clear();
 
             Console.WriteLine(_choices[index].Substring(Indent.Length));
