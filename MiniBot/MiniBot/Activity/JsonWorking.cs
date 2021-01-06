@@ -111,9 +111,8 @@ namespace MiniBot.Activity
                 WriteInfo(accountsList);
             }
 
-            public void CheckJson()
+            public bool CheckJson()
             {
-                _hasAccounts = false;
                 string directory = _path.Split('\\')[0];
 
                 if (!Directory.Exists(directory))
@@ -127,8 +126,10 @@ namespace MiniBot.Activity
                 }
                 else if (File.ReadAllText(_path) != String.Empty)
                 {
-                    _hasAccounts = true;
+                    return true;
                 }
+
+                return false;
             }
 
             private void WriteInfo(List<T> accountsList)

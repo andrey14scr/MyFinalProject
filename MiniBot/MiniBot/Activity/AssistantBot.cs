@@ -9,6 +9,7 @@ using MiniBot.Products;
 using System.Net.Mail;
 using System.IO;
 using LogInfo;
+using System.Text.Json.Serialization;
 
 namespace MiniBot.Activity
 {
@@ -18,6 +19,7 @@ namespace MiniBot.Activity
         {
             public string Name { get; set; }
             public DateTime BirthDate { get; set; }
+            [JsonIgnore]
             public Basket<Product> Basket { get; private set; }
 
             public delegate void CustomerHandler(string email, string message);
@@ -55,7 +57,6 @@ namespace MiniBot.Activity
         }
 
         #region Fields
-        private static bool _hasAccounts;
         private bool _backToMenu;
 
         private List<short> _listID = new List<short>();
@@ -112,7 +113,7 @@ namespace MiniBot.Activity
                     ExitSystem();
                     break;
                 case BotState.Start:
-                    if (_hasAccounts)
+                    if (accountWorker.CheckJson())
                     {
                         SendMessage(defaultString, BotState.AccountDecision);
                     }
@@ -181,7 +182,7 @@ namespace MiniBot.Activity
                             break;
                         case ChoiceExit:
                             _backToMenu = false;
-                            Save(_account);
+                            accountWorker.UpdateAccount(_account);
                             _account.Exit();
                             SendMessage(defaultString, BotState.AccountDecision);
                             break;
@@ -314,7 +315,7 @@ namespace MiniBot.Activity
             if (State == BotState.AccountDecision)
             {
                 AddChoice(Indent + ChoiceRegister);
-                if (_hasAccounts)
+                if (accountWorker.CheckJson())
                     AddChoice(Indent + ChoiceLogin);
                 MakeChoice();
             }
@@ -613,18 +614,6 @@ namespace MiniBot.Activity
         {
             AddChoice(Indent + p.ToString());
             _listID.Add(id);
-        }
-
-        private void Save(UserAccount account)
-        {
-            if (!accountWorker.FindAccount(account.Login, account.Password, ref account))
-            {
-                accountWorker.AddAccount(account);
-            }
-            else
-            {
-                accountWorker.UpdateAccount(account);
-            }
         }
 
         private void ExitSystem(int code = 0)
