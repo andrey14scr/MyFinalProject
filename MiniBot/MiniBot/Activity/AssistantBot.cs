@@ -154,8 +154,8 @@ namespace MiniBot.Activity
                     {
                         if (accountWorker.FindAccount(array[0], array[1], ref _account))
                         {
-                            SendMessage($"Welcome, {_account.Name}! " + DefaultString, BotState.AskProduct);
                             SubscribeAccount();
+                            SendMessage($"Welcome, {_account.Name}! " + DefaultString, BotState.AskProduct);
                         }
                         else
                             SendMessage($"Incorrect login or password! Try again. To come back enter \"{CommandBack}\"", BotState.FindAccount);
@@ -241,7 +241,7 @@ namespace MiniBot.Activity
                                 SendMessage(DefaultString, BotState.AskProduct);
                             break;
                         case ChoiceBuy:
-                            SendMessage(DefaultString, BotState.Confirm);
+                            SendMessage(DefaultString, BotState.AskAdress);
                             break;
                         default:
                             WriteBotName(true);
@@ -278,10 +278,9 @@ namespace MiniBot.Activity
                     switch (command)
                     {
                         case CommandAgree:
-                            SendMessage(DefaultString, BotState.AskAdress);
-                            OrderCompleted(_account.Login, "Completed");
-                            OrderDelivered(_account.Login, "Delivered");
-                            OrderPaid(_account.Login, "Paid");
+                            _account.SendPaid();
+                            _account.SendCompleted();
+                            _account.SendDelivered();
                             SendMessage(DefaultString, BotState.Sleep);
                             break;
                         case CommandBack:
@@ -294,6 +293,9 @@ namespace MiniBot.Activity
                             SendMessage("I don't understand you :(", BotState.Confirm);
                             break;
                     }
+                    break;
+                case BotState.AskAdress:
+                    SendMessage(DefaultString, BotState.Confirm);
                     break;
                 default:
                     break;
@@ -641,19 +643,19 @@ namespace MiniBot.Activity
         private static void OrderCompleted(string email, string message)
         {
             Console.WriteLine("complited");
-            //SendEmail(email, message);
+            SendEmail(email, message);
         }
 
         private static void OrderDelivered(string email, string message)
         {
             Console.WriteLine("delivered");
-            //SendEmail(email, message);
+            SendEmail(email, message);
         }
 
         private static void OrderPaid(string email, string message)
         {
             Console.WriteLine("paid");
-            //SendEmail(email, message);
+            SendEmail(email, message);
         }
 
         private static void SendEmail(string email, string message)
