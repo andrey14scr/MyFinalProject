@@ -8,10 +8,12 @@ using static MiniBot.Activity.Sources;
 
 namespace MiniBot.Interfaces
 {
-    interface IDBWork
+    interface IDBProduct
     {
-        void AddToDB(object product);
-        void GetFromDB(Action<Product, short> action, ProductType producttype);
-        void RemoveFromDB(object product);
+        void AddToDB(Product item);
+
+        IEnumerable<Product> GetFromDB(Func<Product, bool> predicate);
+
+        void RemoveFromDB(Func<Product, bool> predicate);
     }
 }

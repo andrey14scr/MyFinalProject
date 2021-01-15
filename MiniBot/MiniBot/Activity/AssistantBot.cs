@@ -71,7 +71,7 @@ namespace MiniBot.Activity
         private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=" + (new FileInfo(@"..\..\..\Resourcers\DBProducts.mdf")).FullName + ";Integrated Security=True");
         private UserAccount _account = new UserAccount() { Name = guestName };
         private AccountWorker<UserAccount> accountWorker = new AccountWorker<UserAccount>("Resources", "accounts.json");
-        private ProductType _currentType;
+        //private ProductType _currentType;
         #endregion
 
         #region Properties
@@ -165,15 +165,8 @@ namespace MiniBot.Activity
                     switch (command.Substring(Indent.Length))
                     {
                         case ChoicePizza:
-                            _currentType = ProductType.Pizza;
-                            SendMessage(defaultString, BotState.ShowMenu);
-                            break;
                         case ChoiceSushi:
-                            _currentType = ProductType.Sushi;
-                            SendMessage(defaultString, BotState.ShowMenu);
-                            break;
                         case ChoiceDrink:
-                            _currentType = ProductType.Drink;
                             SendMessage(defaultString, BotState.ShowMenu);
                             break;
                         case ChoiceSeeBasket:
@@ -201,21 +194,8 @@ namespace MiniBot.Activity
                         default:
                             WriteBotName(true);
                             Console.WriteLine("Information:");
-                            switch (_currentType)
-                            {
-                                case ProductType.Pizza:
-                                    _currentProduct = (Pizza)_dbWorker.GetById(_currentID);
-                                    (_currentProduct as Pizza).ShowInfo(Indent);
-                                    break;
-                                case ProductType.Sushi:
-                                    _currentProduct = (Sushi)_dbWorker.GetById(_currentID);
-                                    (_currentProduct as Sushi).ShowInfo(Indent);
-                                    break;
-                                case ProductType.Drink:
-                                    _currentProduct = (Drink)_dbWorker.GetById(_currentID);
-                                    (_currentProduct as Drink).ShowInfo(Indent);
-                                    break;
-                            }
+                            _currentProduct = _dbWorker.GetById(_currentID);
+                            _currentProduct.ShowInfo(Indent);
                             SendMessage(defaultString, BotState.ProductDecision);
                             break;
                     }
@@ -258,7 +238,7 @@ namespace MiniBot.Activity
                             WriteBotName(true);
                             Console.WriteLine("Information:");
 
-                            _currentProduct = (Product)_dbWorker.GetById(_currentID);
+                            _currentProduct = _dbWorker.GetById(_currentID);
                             _currentProduct.ShowInfo(Indent);
                             
                             SendMessage(defaultString, BotState.ProductInBusket);
@@ -335,7 +315,7 @@ namespace MiniBot.Activity
             }
             else if (State == BotState.ShowMenu)
             {
-                _dbWorker.GetFromDB(ProductToString, _currentType);
+                ShowProductsChoices(_dbWorker.GetFromDB(x => x.GetType() == _currentProduct.GetType()));
                 AddChoice(Indent + _delimiter); 
                 AddChoice(Indent + ChoiceBack);
                 if (_account.Basket.Count > 0)
@@ -610,10 +590,13 @@ namespace MiniBot.Activity
             return false;
         }
 
-        private void ProductToString(Product p, short id)
+        private void ShowProductsChoices(IEnumerable<Product> products)
         {
-            AddChoice(Indent + p.ToString());
-            _listID.Add(id);
+            foreach (var product in products)
+            {
+                AddChoice(Indent + products.ToString());
+                _listID.Add(product.Id);
+            }
         }
 
         private void ExitSystem(int code = 0)

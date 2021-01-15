@@ -65,9 +65,11 @@ namespace MiniBot.Activity
 
         public const string guestName = "Guest";
 
-        public const string pizzaTable = "PizzaTable";
-        public const string sushiTable = "SushiTable";
-        public const string drinkTable = "DrinkTable";
+        public const string PizzaTable = "PizzaTable";
+        public const string SushiTable = "SushiTable";
+        public const string DrinkTable = "DrinkTable";
+
+        public static string[] ProductTables = new string[] { PizzaTable, SushiTable, DrinkTable };
 
         public static bool IsCommand(string command)
         {

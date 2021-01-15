@@ -10,7 +10,7 @@ using static MiniBot.Activity.Sources;
 
 namespace MiniBot.Activity
 {
-    class DBWorker : IDBWork
+    class DBWorker : IDBProduct
     {
         private string _connectionString;
         private static int _nextId = 0;
@@ -20,21 +20,21 @@ namespace MiniBot.Activity
             _connectionString = path;
         }
 
-        public void AddToDB(object product)
+        public void AddToDB(Product product)
         {
             string table = "", fields = "@Id, @Cost, @Name, @Description, @Score, @Discount, ";
             switch (product)
             {
                 case Pizza:
-                    table = "PizzaTable";
+                    table = PizzaTable;
                     fields += "@Ingredients, @Weight, @Size";
                     break;
                 case Sushi:
-                    table = "SushiTable";
+                    table = SushiTable;
                     fields += "@Ingredients, @Weight, @IsRaw";
                     break;
                 case Drink:
-                    table = "DrinkTable";
+                    table = DrinkTable;
                     fields += "@Volume, @HasGase, @IsAlcohol";
                     break;
                 default:
@@ -52,15 +52,15 @@ namespace MiniBot.Activity
                 {
                     SqlParameter ParamId = new SqlParameter(fieldsArray[0], _nextId++);
                     command.Parameters.Add(ParamId);
-                    SqlParameter ParamCost = new SqlParameter(fieldsArray[1], (product as Product).Cost);
+                    SqlParameter ParamCost = new SqlParameter(fieldsArray[1], product.Cost);
                     command.Parameters.Add(ParamCost);
-                    SqlParameter ParamName = new SqlParameter(fieldsArray[2], (product as Product).Name);
+                    SqlParameter ParamName = new SqlParameter(fieldsArray[2], product.Name);
                     command.Parameters.Add(ParamName);
-                    SqlParameter ParamDescription = new SqlParameter(fieldsArray[3], (product as Product).Description);
+                    SqlParameter ParamDescription = new SqlParameter(fieldsArray[3], product.Description);
                     command.Parameters.Add(ParamDescription);
-                    SqlParameter ParamScore = new SqlParameter(fieldsArray[4], (product as Product).Score);
+                    SqlParameter ParamScore = new SqlParameter(fieldsArray[4], product.Score);
                     command.Parameters.Add(ParamScore);
-                    SqlParameter ParamDiscount = new SqlParameter(fieldsArray[5], (product as Product).Discount);
+                    SqlParameter ParamDiscount = new SqlParameter(fieldsArray[5], product.Discount);
                     command.Parameters.Add(ParamDiscount);
 
                     SqlParameter ParamFirst = null, ParamSecond = null, ParamThird = null;
@@ -113,100 +113,96 @@ namespace MiniBot.Activity
             }
         }
 
-        public void GetFromDB(Action<Product, short> action, ProductType producttype)
+        public IEnumerable<Product> GetFromDB(Func<Product, bool> predicate)
         {
-            string table = "";
-            switch (producttype)
-            {
-                case ProductType.Pizza:
-                    table = "PizzaTable";
-                    break;
-                case ProductType.Sushi:
-                    table = "SushiTable";
-                    break;
-                case ProductType.Drink:
-                    table = "DrinkTable";
-                    break;
-            }
+            List<Product> answerList = new List<Product>();
+            Product product = null;
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                string sqlExpression = $"SELECT * FROM {table}";
-                using (SqlCommand command = new SqlCommand(sqlExpression, connection))
-                {
-                    SqlDataReader reader = command.ExecuteReader();
 
-                    if (reader.HasRows)
+                string sqlExpression;
+
+                foreach (var table in ProductTables)
+                {
+                    sqlExpression = $"SELECT * FROM {table}";
+
+                    using (SqlCommand command = new SqlCommand(sqlExpression, connection))
                     {
-                        while (reader.Read())
+                        SqlDataReader reader = command.ExecuteReader();
+
+                        if (reader.HasRows)
                         {
-                            switch (producttype)
+                            while (reader.Read())
                             {
-                                case ProductType.Pizza:
-                                    Pizza pizza = new Pizza((string)reader["Name"], (float)reader["Cost"], 
-                                        (byte)reader["Score"], (string)reader["Description"],
-                                        ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (byte)reader["Size"]);
-                                    pizza.Discount = (byte)reader["Discount"];
-                                    action(pizza, (short)(int)reader["Id"]);
-                                    break;
-                                case ProductType.Sushi:
-                                    Sushi sushi = new Sushi((string)reader["Name"], (float)reader["Cost"],
-                                        (byte)reader["Score"], (string)reader["Description"],
-                                        ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (bool)reader["IsRaw"]);
-                                    sushi.Discount = (byte)reader["Discount"];
-                                    action(sushi, (short)(int)reader["Id"]);
-                                    break;
-                                case ProductType.Drink:
-                                    Drink drink = new Drink((string)reader["Name"], (float)reader["Cost"], 
-                                        (byte)reader["Score"], (string)reader["Description"],
-                                        (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
-                                    drink.Discount = (byte)reader["Discount"];
-                                    action(drink, (short)(int)reader["Id"]);
-                                    break;
+                                switch (table)
+                                {
+                                    case PizzaTable:
+                                        product = new Pizza((short)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                            (byte)reader["Score"], (string)reader["Description"],
+                                            ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (byte)reader["Size"]);
+                                        (product as Pizza).Discount = (byte)reader["Discount"];
+                                        break;
+                                    case SushiTable:
+                                        product = new Sushi((short)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                            (byte)reader["Score"], (string)reader["Description"],
+                                            ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (bool)reader["IsRaw"]);
+                                        (product as Pizza).Discount = (byte)reader["Discount"];
+                                        break;
+                                    case DrinkTable:
+                                        product = new Drink((short)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                            (byte)reader["Score"], (string)reader["Description"],
+                                            (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
+                                        (product as Pizza).Discount = (byte)reader["Discount"];
+                                        break;
+                                }
+
+                                if (predicate(product))
+                                {
+                                    answerList.Add(product);
+                                }
                             }
                         }
-                    }
 
-                    reader.Close();
+                        reader.Close();
+                    }
                 }
             }
 
-            GC.Collect();
+            return answerList;
         }
 
-        public object GetById(short id)
+        public Product GetById(short id)
         {
             Product result = null;
-
-            string[] tables = { pizzaTable, sushiTable, drinkTable };
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
 
-                for (int i = 0; i < tables.Length; i++)
+                foreach (var table in ProductTables)
                 {
-                    string sqlExpression = $"SELECT * FROM {tables[i]} WHERE Id={id}";
+                    string sqlExpression = $"SELECT * FROM {table} WHERE Id={id}";
                     using (SqlCommand command = new SqlCommand(sqlExpression, connection))
                     {
                         SqlDataReader reader = command.ExecuteReader();
                         if (reader.HasRows && reader.Read())
                         {
-                            switch (tables[i])
+                            switch (table)
                             {
-                                case pizzaTable:
-                                    result = new Pizza((string)reader["Name"], (float)reader["Cost"],
+                                case PizzaTable:
+                                    result = new Pizza((short)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                         (byte)reader["Score"], (string)reader["Description"],
                                         ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (byte)reader["Size"]);
                                     break;
-                                case sushiTable:
-                                    result = new Sushi((string)reader["Name"], (float)reader["Cost"],
+                                case SushiTable:
+                                    result = new Sushi((short)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                         (byte)reader["Score"], (string)reader["Description"],
                                         ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (bool)reader["IsRaw"]);
                                     break;
-                                case drinkTable:
-                                    result = new Drink((string)reader["Name"], (float)reader["Cost"],
+                                case DrinkTable:
+                                    result = new Drink((short)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                         (byte)reader["Score"], (string)reader["Description"],
                                         (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
                                     break;
@@ -222,9 +218,9 @@ namespace MiniBot.Activity
             return result;
         }
 
-        public void RemoveFromDB(object product)
+        public void RemoveFromDB(Func<Product, bool> predicate)
         {
-            
+            throw new NotImplementedException();
         }
     }
 }
