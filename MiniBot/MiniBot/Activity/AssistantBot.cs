@@ -10,6 +10,7 @@ using System.Net.Mail;
 using System.IO;
 using LogInfo;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace MiniBot.Activity
 {
@@ -114,7 +115,7 @@ namespace MiniBot.Activity
                 case BotState.Sleep:
                     ExitSystem();
                     break;
-                case BotState.Start:
+                case BotState.Start:                    
                     if (accountWorker.CheckJson())
                     {
                         SendMessage(DefaultString, BotState.AccountDecision);
@@ -152,13 +153,23 @@ namespace MiniBot.Activity
                     string[] array = command.Split(' ');
                     if (command.Contains(" ") && array.Length == 2)
                     {
-                        if (accountWorker.FindAccount(array[0], array[1], ref _account))
+                        var emailAttribute = (EmailAttribute)typeof(UserAccount).GetProperty("Login").GetCustomAttributes(false).First(x => x.GetType() == typeof(EmailAttribute));
+                        
+                        if (emailAttribute != null) 
                         {
-                            SendMessage($"Welcome, {_account.Name}! " + DefaultString, BotState.AskProduct);
-                            SubscribeAccount();
+                            if (Regex.IsMatch(array[0], emailAttribute.Mask, RegexOptions.IgnoreCase))
+                            {
+                                SendMessage($"Welcome, {_account.Name}! " + DefaultString, BotState.AskProduct);
+                                SubscribeAccount();
+                            }
+                            else
+                                SendMessage($"Incorrect login or password! Try again. To come back enter \"{CommandBack}\"", BotState.FindAccount);
                         }
                         else
-                            SendMessage($"Incorrect login or password! Try again. To come back enter \"{CommandBack}\"", BotState.FindAccount);
+                        {
+                            SendMessage("Something is wrong...", false);
+                            return;
+                        }
                     }
                     else
                         SendMessage($"Bad input value. Enter your login and password throuh a whitespace. Example: \"example@example.com 1234\". To come back enter \"{CommandBack}\"", BotState.FindAccount);

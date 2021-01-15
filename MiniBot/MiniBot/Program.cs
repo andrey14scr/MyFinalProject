@@ -6,6 +6,7 @@ using System.IO;
 using LogInfo;
 using System.Reflection;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace MiniBot
 {

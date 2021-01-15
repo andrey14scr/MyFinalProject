@@ -14,6 +14,7 @@ namespace LogInfo
         File = 1
     }
 
+    [DebugMode]
     public class Logger
     {
         private int _counter = 0;
@@ -38,14 +39,7 @@ namespace LogInfo
                 Directory.CreateDirectory(folderName);
             }
 
-            foreach (var attribute in Assembly.GetExecutingAssembly().GetCustomAttributes(false))
-            {
-                var debuggableAttribute = attribute as DebuggableAttribute;
-                if (debuggableAttribute != null)
-                {
-                    _isDebug = debuggableAttribute.IsJITTrackingEnabled;
-                }
-            }
+            DetectDebug();
 
             if (File.Exists(folderName + "\\" + settingsName)) 
             {
@@ -104,7 +98,6 @@ namespace LogInfo
                     "is alive: " + Thread.CurrentThread.IsAlive + ", " +
                     "is background: " + Thread.CurrentThread.IsBackground + ".\n";
 
-
                 string fileName = CreateFileName();
 
                 FileInfo file = new FileInfo(fileName);
@@ -146,8 +139,10 @@ namespace LogInfo
                         Console.BackgroundColor = ConsoleColor.White;
                         break;
                 }
+
                 Console.Write(mode);
                 Console.ResetColor();
+
                 Console.WriteLine("] " + message + "\n" +
                     "Location: " + stackTrace.GetFrame(2).GetMethod().DeclaringType + ", " + stackTrace.GetFrame(2).GetMethod().Name + "()\n" +
                     "Thread info. " +
@@ -171,6 +166,28 @@ namespace LogInfo
             using (var sw = new StreamWriter(path, true))
             {
                 sw.WriteLine(content);
+            }
+        }
+
+        private void DetectDebug()
+        {
+            bool debugMode = false;
+
+            var debuggableAttribute = (DebuggableAttribute)Assembly.GetExecutingAssembly().GetCustomAttribute(typeof(DebuggableAttribute));
+
+            if (debuggableAttribute != null)
+            {
+                debugMode = debuggableAttribute.IsJITTrackingEnabled;
+            }
+            
+            var customDebuggableAttribute = (DebugModeAttribute)this.GetType().GetCustomAttribute(typeof(DebugModeAttribute));
+
+            if (customDebuggableAttribute != null)
+            {
+                if (customDebuggableAttribute.IsDebugMode ^ debugMode)
+                    _isDebug = false;
+                else
+                    _isDebug = true;
             }
         }
     }
