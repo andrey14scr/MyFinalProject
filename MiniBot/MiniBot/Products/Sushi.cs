@@ -11,7 +11,7 @@ namespace MiniBot.Products
     class Sushi : Food, IShowInfo, IGetInfo
     {
         public bool IsRaw { get; private set; }
-        public Sushi(short id, string name, float cost, byte score, string description, string[] ingredients, short weight, bool israw) : base(id, name, cost, score, description, ingredients, weight)
+        public Sushi(int id, string name, float cost, byte score, string description, string[] ingredients, short weight, bool israw) : base(id, name, cost, score, description, ingredients, weight)
         {
             IsRaw = israw;
         }

@@ -139,19 +139,19 @@ namespace MiniBot.Activity
                                 switch (table)
                                 {
                                     case PizzaTable:
-                                        product = new Pizza((short)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                        product = new Pizza((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                             (byte)reader["Score"], (string)reader["Description"],
                                             ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (byte)reader["Size"]);
                                         (product as Pizza).Discount = (byte)reader["Discount"];
                                         break;
                                     case SushiTable:
-                                        product = new Sushi((short)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                        product = new Sushi((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                             (byte)reader["Score"], (string)reader["Description"],
                                             ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (bool)reader["IsRaw"]);
                                         (product as Pizza).Discount = (byte)reader["Discount"];
                                         break;
                                     case DrinkTable:
-                                        product = new Drink((short)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                        product = new Drink((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                             (byte)reader["Score"], (string)reader["Description"],
                                             (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
                                         (product as Pizza).Discount = (byte)reader["Discount"];
@@ -173,7 +173,7 @@ namespace MiniBot.Activity
             return answerList;
         }
 
-        public Product GetById(short id)
+        public Product GetById(int id)
         {
             Product result = null;
 
@@ -192,17 +192,17 @@ namespace MiniBot.Activity
                             switch (table)
                             {
                                 case PizzaTable:
-                                    result = new Pizza((short)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                    result = new Pizza((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                         (byte)reader["Score"], (string)reader["Description"],
                                         ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (byte)reader["Size"]);
                                     break;
                                 case SushiTable:
-                                    result = new Sushi((short)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                    result = new Sushi((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                         (byte)reader["Score"], (string)reader["Description"],
                                         ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (bool)reader["IsRaw"]);
                                     break;
                                 case DrinkTable:
-                                    result = new Drink((short)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                    result = new Drink((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                         (byte)reader["Score"], (string)reader["Description"],
                                         (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
                                     break;

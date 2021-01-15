@@ -14,7 +14,7 @@ namespace MiniBot.Products
         public bool HasGase { get; private set; }
         public bool IsAlcohol { get; private set; }
 
-        public Drink(short id, string name, float cost, byte score, string description, float volume, bool hasgase, bool isalcohol) : base(id, name, cost, score, description)
+        public Drink(int id, string name, float cost, byte score, string description, float volume, bool hasgase, bool isalcohol) : base(id, name, cost, score, description)
         {
             Volume = volume;
             HasGase = hasgase;

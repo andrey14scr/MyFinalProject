@@ -59,13 +59,14 @@ namespace MiniBot.Activity
         #region Fields
         private bool _backToMenu;
 
-        private List<short> _listID = new List<short>();
+        private List<int> _listID = new List<int>();
         private List<string> _choices = new List<string>();
 
-        private short _currentID = -1;
+        private int _currentID = -1;
 
         private string _buffer;
-        private const string defaultString = null;
+        private const string DefaultString = null;
+        private string _adress;
 
         private Product _currentProduct;
         private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=" + (new FileInfo(@"..\..\..\Resourcers\DBProducts.mdf")).FullName + ";Integrated Security=True");
@@ -115,7 +116,7 @@ namespace MiniBot.Activity
                 case BotState.Start:
                     if (accountWorker.CheckJson())
                     {
-                        SendMessage(defaultString, BotState.AccountDecision);
+                        SendMessage(DefaultString, BotState.AccountDecision);
                     }
                     else
                     {
@@ -134,7 +135,7 @@ namespace MiniBot.Activity
                             break;
                         case ChoiceLogin:
                             State = BotState.FindAccount;
-                            SendMessage(defaultString, BotState.FindAccount);
+                            SendMessage(DefaultString, BotState.FindAccount);
                             break;
                         default:
                             SendMessage("Sorry, I don't understand you :(", BotState.AccountDecision);
@@ -144,7 +145,7 @@ namespace MiniBot.Activity
                 case BotState.FindAccount:
                     if (BackFromAccount(_buffer))
                     {
-                        SendMessage(defaultString, BotState.AccountDecision);
+                        SendMessage(DefaultString, BotState.AccountDecision);
                         break;
                     }
                     string[] array = command.Split(' ');
@@ -152,7 +153,7 @@ namespace MiniBot.Activity
                     {
                         if (accountWorker.FindAccount(array[0], array[1], ref _account))
                         {
-                            SendMessage($"Welcome, {_account.Name}! " + defaultString, BotState.AskProduct);
+                            SendMessage($"Welcome, {_account.Name}! " + DefaultString, BotState.AskProduct);
                             SubscribeAccount();
                         }
                         else
@@ -167,17 +168,17 @@ namespace MiniBot.Activity
                         case ChoicePizza:
                         case ChoiceSushi:
                         case ChoiceDrink:
-                            SendMessage(defaultString, BotState.ShowMenu);
+                            SendMessage(DefaultString, BotState.ShowMenu);
                             break;
                         case ChoiceSeeBasket:
                             _backToMenu = false;
-                            SendMessage(defaultString, BotState.ShowBasket);
+                            SendMessage(DefaultString, BotState.ShowBasket);
                             break;
                         case ChoiceExit:
                             _backToMenu = false;
                             accountWorker.UpdateAccount(_account);
                             _account.Exit();
-                            SendMessage(defaultString, BotState.AccountDecision);
+                            SendMessage(DefaultString, BotState.AccountDecision);
                             break;
                     }
                     break;
@@ -185,18 +186,18 @@ namespace MiniBot.Activity
                     switch (command.Substring(Indent.Length))
                     {
                         case ChoiceBack:
-                            SendMessage(defaultString, BotState.AskProduct);
+                            SendMessage(DefaultString, BotState.AskProduct);
                             break;
                         case ChoiceSeeBasket:
                             _backToMenu = true;
-                            SendMessage(defaultString, BotState.ShowBasket);
+                            SendMessage(DefaultString, BotState.ShowBasket);
                             break;
                         default:
                             WriteBotName(true);
                             Console.WriteLine("Information:");
                             _currentProduct = _dbWorker.GetById(_currentID);
                             _currentProduct.ShowInfo(Indent);
-                            SendMessage(defaultString, BotState.ProductDecision);
+                            SendMessage(DefaultString, BotState.ProductDecision);
                             break;
                     }
                     break;
@@ -204,10 +205,10 @@ namespace MiniBot.Activity
                     switch (command.Substring(Indent.Length))
                     {
                         case ChoiceBack:
-                            SendMessage(defaultString, BotState.ShowMenu);
+                            SendMessage(DefaultString, BotState.ShowMenu);
                             break;
                         case ChoiceTake:
-                            SendMessage(defaultString, BotState.AskAmount);
+                            SendMessage(DefaultString, BotState.AskAmount);
                             break;
                     }
                     break;
@@ -227,12 +228,12 @@ namespace MiniBot.Activity
                     {
                         case ChoiceBack:
                             if (_backToMenu)
-                                SendMessage(defaultString, BotState.ShowMenu);
+                                SendMessage(DefaultString, BotState.ShowMenu);
                             else
-                                SendMessage(defaultString, BotState.AskProduct);
+                                SendMessage(DefaultString, BotState.AskProduct);
                             break;
                         case ChoiceBuy:
-                            SendMessage(defaultString, BotState.Confirm);
+                            SendMessage(DefaultString, BotState.Confirm);
                             break;
                         default:
                             WriteBotName(true);
@@ -241,7 +242,7 @@ namespace MiniBot.Activity
                             _currentProduct = _dbWorker.GetById(_currentID);
                             _currentProduct.ShowInfo(Indent);
                             
-                            SendMessage(defaultString, BotState.ProductInBusket);
+                            SendMessage(DefaultString, BotState.ProductInBusket);
                             break;
                     }
                     break;
@@ -250,18 +251,18 @@ namespace MiniBot.Activity
                     {
                         case ChoiceRemove:
                             _account.Basket.RemoveById(_currentID);
-                            SendMessage(defaultString, BotState.ShowBasket);
+                            SendMessage(DefaultString, BotState.ShowBasket);
                             break;
                         case ChoiceReduce:
                             _account.Basket.Remove(_currentProduct, _currentID);
-                            SendMessage(defaultString, BotState.ProductInBusket);
+                            SendMessage(DefaultString, BotState.ProductInBusket);
                             break;
                         case ChoiceEnlarge:
                             _account.Basket.Add(_currentProduct, _currentID);
-                            SendMessage(defaultString, BotState.ProductInBusket);
+                            SendMessage(DefaultString, BotState.ProductInBusket);
                             break;
                         case ChoiceBack:
-                            SendMessage(defaultString, BotState.ShowBasket);
+                            SendMessage(DefaultString, BotState.ShowBasket);
                             break;
                     }
                     break;
@@ -272,10 +273,10 @@ namespace MiniBot.Activity
                             OrderCompleted(_account.Login, "Completed");
                             OrderDelivered(_account.Login, "Delivered");
                             OrderPaid(_account.Login, "Paid");
-                            SendMessage(defaultString, BotState.Sleep);
+                            SendMessage(DefaultString, BotState.Sleep);
                             break;
                         case CommandBack:
-                            SendMessage(defaultString, BotState.ShowBasket);
+                            SendMessage(DefaultString, BotState.ShowBasket);
                             break;
                         case CommandExit:
                             ExitSystem();
@@ -471,23 +472,23 @@ namespace MiniBot.Activity
             if (State == BotState.AccountDecision)
             {
                 
-                SendMessage(defaultString, BotState.AccName);
+                SendMessage(DefaultString, BotState.AccName);
                 
                 if (BackFromAccount(_buffer))
                 {
-                    SendMessage(defaultString, BotState.AccountDecision);
+                    SendMessage(DefaultString, BotState.AccountDecision);
                     return;
                 }
 
                 _account.Name = Char.ToUpper(_buffer[0]) + _buffer.Substring(1);
 
-                SendMessage(defaultString, BotState.AccBirthDate);
+                SendMessage(DefaultString, BotState.AccBirthDate);
 
                 while (true)
                 {
                     if (BackFromAccount(_buffer))
                     {
-                        SendMessage(defaultString, BotState.AccountDecision);
+                        SendMessage(DefaultString, BotState.AccountDecision);
                         return;
                     }
                     
@@ -520,12 +521,12 @@ namespace MiniBot.Activity
                     break;
                 }
 
-                SendMessage(defaultString, BotState.AccLogin);
+                SendMessage(DefaultString, BotState.AccLogin);
 
                 while (true)
                 {
                     if (BackFromAccount(_buffer))
-                        SendMessage(defaultString, BotState.AccountDecision);
+                        SendMessage(DefaultString, BotState.AccountDecision);
                     
                     if (!_buffer.Contains('@') || !_buffer.Contains('.'))
                     {
@@ -537,10 +538,10 @@ namespace MiniBot.Activity
                     break;
                 }
 
-                SendMessage(defaultString, BotState.AccPassword);
+                SendMessage(DefaultString, BotState.AccPassword);
 
                 if (BackFromAccount(_buffer))
-                    SendMessage(defaultString, BotState.AccountDecision);
+                    SendMessage(DefaultString, BotState.AccountDecision);
                 _account.Password = _buffer;
 
                 SendMessage("Hooray! Now you have an account and you can buy something.", BotState.Write);
@@ -548,7 +549,7 @@ namespace MiniBot.Activity
 
                 SubscribeAccount();
 
-                SendMessage(defaultString, BotState.AskProduct);
+                SendMessage(DefaultString, BotState.AskProduct);
             }
             else
             {

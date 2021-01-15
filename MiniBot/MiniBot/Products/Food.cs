@@ -12,7 +12,7 @@ namespace MiniBot.Products
         public string[] Ingredients { get; private set; }
         public short Weight { get; private set; }
 
-        public Food(short id, string name, float cost, byte score, string description, string[] ingredients, short weight) : base(id, name, cost, score, description)
+        public Food(int id, string name, float cost, byte score, string description, string[] ingredients, short weight) : base(id, name, cost, score, description)
         {
             if (ingredients.Length == 0)
                 throw new Exception();

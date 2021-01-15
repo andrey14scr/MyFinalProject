@@ -12,7 +12,7 @@ namespace MiniBot.Products
     class Pizza : Food, IShowInfo, IGetInfo
     {
         public byte Size { get; private set; }
-        public Pizza(short id, string name, float cost, byte score, string description, string[] ingredients, short weight, byte size) : base(id, name, cost, score, description, ingredients, weight)
+        public Pizza(int id, string name, float cost, byte score, string description, string[] ingredients, short weight, byte size) : base(id, name, cost, score, description, ingredients, weight)
         {
             Size = size;
         }
