@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MiniBot.Products
 {
-    class Drink : Product, IShowInfo, IGetInfo
+    class Drink : Product
     {
         public float Volume { get; private set; }
         public bool HasGase { get; private set; }
@@ -23,34 +23,10 @@ namespace MiniBot.Products
 
         public string GetInfo(string space = "")
         {
-            return Name + "\n" + GetInfoWithoutname();
+            return Name + "\n" + GetInfoWithoutName();
         }
 
-        public string GetShortInfo(string space = "")
-        {
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append(space);
-            sb.Append(Name);
-            sb.Append($" {Cost:$0.00}");
-
-            return sb.ToString();
-        }
-
-        public override void ShowShortInfo(string space = "")
-        {
-            Console.WriteLine($"{space}{Name} {Cost:$0.00}");
-        }
-
-        public override void ShowInfo(string space = "")
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"{space}{Name}");
-            Console.ResetColor();
-            Console.WriteLine(this.GetInfoWithoutname(space));
-        }
-
-        private string GetInfoWithoutname(string space = "")
+        protected override string GetInfoWithoutName(string space = "")
         {
             StringBuilder sb = new StringBuilder();
             StringBuilderExtension.Space = space;

@@ -10,6 +10,6 @@ namespace MiniBot.Interfaces
     {
         void ShowShortInfo(string space = "");
 
-        void ShowInfo(string space = "");
+        void ShowInfo(string space = "", bool isSpacedName = false);
     }
 }

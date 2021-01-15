@@ -14,7 +14,7 @@ namespace MiniBot.Activity
 
         private int ChoosePosition()
         {
-            string currentDelimiter = Indent + _delimiter;
+            string currentDelimiter = _delimiter;
 
             int result = -1;
             (int x, int y) position;
@@ -79,14 +79,14 @@ namespace MiniBot.Activity
         private void HighLight(string msg, ConsoleColor cc)
         {
             Console.ForegroundColor = cc;
-            Console.Write("\r" + msg);
+            Console.Write("\r" + Indent + msg);
             Console.ResetColor();
         }
 
         private void AddChoice(string answer)
         {
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(answer);
+            Console.WriteLine(Indent + answer);
             Console.ResetColor();
             _choices.Add(answer);
         }
@@ -107,7 +107,7 @@ namespace MiniBot.Activity
                 _currentID = _account.Basket[index].id;
             _listID.Clear();
 
-            Console.WriteLine(_choices[index].Substring(Indent.Length));
+            Console.WriteLine(_choices[index]);
 
             _choices.Clear();
         }

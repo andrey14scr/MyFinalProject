@@ -28,8 +28,33 @@ namespace MiniBot.Products
             return $"{Name}: {Cost:$0.00}";
         }
 
-        abstract public void ShowShortInfo(string space = "");
+        public void ShowInfo(string space = "", bool isSpacedName = false)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            if (isSpacedName)
+                Console.WriteLine($"{space}{Name}:");
+            else
+                Console.WriteLine($"{Name}:");
+            Console.ResetColor();
+            Console.WriteLine(this.GetInfoWithoutName(space));
+        }
 
-        abstract public void ShowInfo(string space = "");
+        public void ShowShortInfo(string space = "")
+        {
+            Console.WriteLine($"{space}{Name} {Cost:$0.00}");
+        }
+
+        public string GetShortInfo(string space = "")
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(space);
+            sb.Append(Name);
+            sb.Append($" {Cost:$0.00}");
+
+            return sb.ToString();
+        }
+
+        abstract protected string GetInfoWithoutName(string space = "");
     }
 }
