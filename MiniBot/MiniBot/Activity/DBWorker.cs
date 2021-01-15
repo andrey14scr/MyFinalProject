@@ -142,21 +142,19 @@ namespace MiniBot.Activity
                                         product = new Pizza((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                             (byte)reader["Score"], (string)reader["Description"],
                                             ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (byte)reader["Size"]);
-                                        (product as Pizza).Discount = (byte)reader["Discount"];
                                         break;
                                     case SushiTable:
                                         product = new Sushi((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                             (byte)reader["Score"], (string)reader["Description"],
                                             ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (bool)reader["IsRaw"]);
-                                        (product as Pizza).Discount = (byte)reader["Discount"];
                                         break;
                                     case DrinkTable:
                                         product = new Drink((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                             (byte)reader["Score"], (string)reader["Description"],
                                             (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
-                                        (product as Pizza).Discount = (byte)reader["Discount"];
                                         break;
                                 }
+                                product.Discount = (byte)reader["Discount"];
 
                                 if (predicate(product))
                                 {

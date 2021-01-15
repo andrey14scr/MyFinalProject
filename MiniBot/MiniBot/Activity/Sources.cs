@@ -28,6 +28,7 @@ namespace MiniBot.Activity
             ShowBasket,
             ProductInBusket,
             Confirm,
+            AskAdress,
         }
 
         public enum ProductType : byte

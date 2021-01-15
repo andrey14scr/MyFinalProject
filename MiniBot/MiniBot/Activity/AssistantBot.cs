@@ -69,6 +69,7 @@ namespace MiniBot.Activity
         private string _adress;
 
         private Product _currentProduct;
+        private Type _currentType;
         private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=" + (new FileInfo(@"..\..\..\Resourcers\DBProducts.mdf")).FullName + ";Integrated Security=True");
         private UserAccount _account = new UserAccount() { Name = guestName };
         private AccountWorker<UserAccount> accountWorker = new AccountWorker<UserAccount>("Resources", "accounts.json");
@@ -166,8 +167,15 @@ namespace MiniBot.Activity
                     switch (command.Substring(Indent.Length))
                     {
                         case ChoicePizza:
+                            _currentType = typeof(Pizza);
+                            SendMessage(DefaultString, BotState.ShowMenu);
+                            break;
                         case ChoiceSushi:
+                            _currentType = typeof(Sushi);
+                            SendMessage(DefaultString, BotState.ShowMenu);
+                            break;
                         case ChoiceDrink:
+                            _currentType = typeof(Drink);
                             SendMessage(DefaultString, BotState.ShowMenu);
                             break;
                         case ChoiceSeeBasket:
@@ -270,6 +278,7 @@ namespace MiniBot.Activity
                     switch (command)
                     {
                         case CommandAgree:
+                            SendMessage(DefaultString, BotState.AskAdress);
                             OrderCompleted(_account.Login, "Completed");
                             OrderDelivered(_account.Login, "Delivered");
                             OrderPaid(_account.Login, "Paid");
@@ -316,11 +325,12 @@ namespace MiniBot.Activity
             }
             else if (State == BotState.ShowMenu)
             {
-                ShowProductsChoices(_dbWorker.GetFromDB(x => x.GetType() == _currentProduct.GetType()));
+                ShowProductsChoices(_dbWorker.GetFromDB(x => x.GetType() == _currentType));
+                
                 AddChoice(Indent + _delimiter); 
-                AddChoice(Indent + ChoiceBack);
                 if (_account.Basket.Count > 0)
                     AddChoice(Indent + ChoiceSeeBasket);
+                AddChoice(Indent + ChoiceBack);
 
                 MakeChoice();
                 State = BotState.ShowProduct;
@@ -347,8 +357,8 @@ namespace MiniBot.Activity
                 }
 
                 AddChoice(Indent + _delimiter);
-                AddChoice(Indent + ChoiceBack);
                 AddChoice(Indent + ChoiceBuy);
+                AddChoice(Indent + ChoiceBack);
 
                 MakeChoice();
             }
@@ -428,6 +438,9 @@ namespace MiniBot.Activity
                         break;
                     case BotState.Confirm:
                         msg = $"The total price is {_account.Basket.TotalPrice:$0.00}. Enter \"-agree\" to confirm order.";
+                        break;
+                    case BotState.AskAdress:
+                        msg = $"Enter your adress, please.";
                         break;
                     default:
                         break;
@@ -595,7 +608,7 @@ namespace MiniBot.Activity
         {
             foreach (var product in products)
             {
-                AddChoice(Indent + products.ToString());
+                AddChoice(Indent + product.ToString());
                 _listID.Add(product.Id);
             }
         }
@@ -627,17 +640,20 @@ namespace MiniBot.Activity
 
         private static void OrderCompleted(string email, string message)
         {
-            SendEmail(email, message);
+            Console.WriteLine("complited");
+            //SendEmail(email, message);
         }
 
         private static void OrderDelivered(string email, string message)
         {
-            SendEmail(email, message);
+            Console.WriteLine("delivered");
+            //SendEmail(email, message);
         }
 
         private static void OrderPaid(string email, string message)
         {
-            SendEmail(email, message);
+            Console.WriteLine("paid");
+            //SendEmail(email, message);
         }
 
         private static void SendEmail(string email, string message)
