@@ -16,11 +16,6 @@ namespace MiniBot.Products
             IsRaw = israw;
         }
 
-        public string GetInfo(string space = "")
-        {
-            return Name + "\n" + GetInfoWithoutName();
-        }
-
         protected override string GetInfoWithoutName(string space = "")
         {
             StringBuilder sb = new StringBuilder();

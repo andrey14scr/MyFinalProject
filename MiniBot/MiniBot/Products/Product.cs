@@ -55,6 +55,11 @@ namespace MiniBot.Products
             return sb.ToString();
         }
 
+        public string GetInfo(string space = "")
+        {
+            return Name + "\n" + GetInfoWithoutName();
+        }
+
         abstract protected string GetInfoWithoutName(string space = "");
     }
 }
