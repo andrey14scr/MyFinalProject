@@ -32,8 +32,10 @@ namespace LogInfo
         private bool _isDebug;
         private bool _isInited = false;
 
-        public Logger()
+        public Logger(Mode mode = Mode.File)
         {
+            Mode = mode;
+
             if (!Directory.Exists(folderName))
             {
                 Directory.CreateDirectory(folderName);

@@ -74,7 +74,7 @@ namespace MiniBot.Activity
         private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=" + (new FileInfo(@"..\..\..\Resourcers\DBProducts.mdf")).FullName + ";Integrated Security=True");
         private UserAccount _account = new UserAccount() { Name = guestName };
         private AccountWorker<UserAccount> accountWorker = new AccountWorker<UserAccount>("Resources", "accounts.json");
-        //private ProductType _currentType;
+        Logger _logger = new Logger();
         #endregion
 
         #region Properties
@@ -154,14 +154,20 @@ namespace MiniBot.Activity
                     if (command.Contains(" ") && array.Length == 2)
                     {
                         var emailAttribute = (EmailAttribute)typeof(UserAccount).GetProperty("Login").GetCustomAttributes(false).First(x => x.GetType() == typeof(EmailAttribute));
-                        
-                        if (emailAttribute != null) 
+
+                        if (CheckEmail(array[0]))
                         {
-                            if (Regex.IsMatch(array[0], emailAttribute.Mask, RegexOptions.IgnoreCase))
+                            if (accountWorker.FindAccount(array[0], array[1], ref _account))
                             {
-                                SendMessage($"Welcome, {_account.Name}! " + DefaultString, BotState.AskProduct);
                                 SubscribeAccount();
+                                SendMessage($"Welcome, {_account.Name}! " + DefaultString, BotState.AskProduct);
                             }
+                            else
+                                SendMessage($"Incorrect email or password! Try again.", BotState.FindAccount);
+                        }
+                        else
+                            SendMessage($"Incorrect email format!", BotState.FindAccount);
+                    }
                     else
                         SendMessage($"Bad input value. Enter your login and password throuh a whitespace. Example: \"example@example.com 1234\". To come back enter \"{CommandBack}\"", BotState.FindAccount);
                     break;
@@ -543,11 +549,14 @@ namespace MiniBot.Activity
                 while (true)
                 {
                     if (BackFromAccount(_buffer))
-                        SendMessage(DefaultString, BotState.AccountDecision);
-                    
-                    if (!_buffer.Contains('@') || !_buffer.Contains('.'))
                     {
-                        SendMessage("You should enter your mail. Example: example@example.com");
+                        SendMessage(DefaultString, BotState.AccountDecision);
+                        return;
+                    }
+
+                    if (!CheckEmail(_buffer))
+                    {
+                        SendMessage("Incorrect email format!");
                         continue;
                     }
 
@@ -573,6 +582,21 @@ namespace MiniBot.Activity
                 SendMessage("So, may be next time. Good bye!");
                 ExitSystem();
             }
+        }
+
+        private bool CheckEmail(string input)
+        {
+            var emailAttribute = (EmailAttribute)typeof(UserAccount).GetProperty("Login").GetCustomAttributes(false).First(x => x.GetType() == typeof(EmailAttribute));
+
+            if (emailAttribute == null)
+            {
+                _logger.Error("Email attribute is not found.");
+            }
+
+            if (Regex.IsMatch(input, emailAttribute.Mask, RegexOptions.IgnoreCase))
+                return true;
+            else
+                return false;
         }
 
         private bool CheckCommand(ref string command)
