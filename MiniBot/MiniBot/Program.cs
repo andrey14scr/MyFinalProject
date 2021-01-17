@@ -19,6 +19,14 @@ namespace MiniBot
             Logger logger = new Logger();
             logger.Mode = Mode.Console;
 
+            //bot.SendMessage("Hi", Sources.BotState.WriteAndWait);
+            //bot.SendMessage("Login or register?", Sources.BotState.AccountDecision);
+            //bot.DoAction(bot.GetBuffer());
+            //bot.SendMessage(null, Sources.BotState.FindAccount);
+            //bot.DoAction(bot.GetBuffer());
+           
+
+
             //string s = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
 
             /*

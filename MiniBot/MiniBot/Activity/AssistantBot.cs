@@ -64,6 +64,7 @@ namespace MiniBot.Activity
 
         #region Fields
         private bool _backToMenu;
+        private bool _isAuto;
 
         private List<int> _listID = new List<int>();
         private List<string> _choices = new List<string>();
@@ -89,10 +90,15 @@ namespace MiniBot.Activity
         #endregion
 
         #region Ctors
-        public AssistantBot() : this("Henry") { }
+        public AssistantBot() : this("Henry", true) { }
 
-        public AssistantBot(string botname)
+        public AssistantBot(string botname) : this(botname, true) { }
+
+        public AssistantBot(bool isAuto) : this("Henry", isAuto) { }
+
+        public AssistantBot(string botname, bool isAuto)
         {
+            _isAuto = isAuto;
             BotName = botname;
             Indent = new String(' ', BotName.Length + 2);
             accountWorker.CheckJson();
@@ -102,6 +108,9 @@ namespace MiniBot.Activity
         #region Interface methods
         public void Start()
         {
+            if (!_isAuto)
+                return;
+
             SendMessage($"Hello, I am {BotName} - your bot assistant, that can help you to take an order.\n" +
                 $"{Indent}If you want to exit from the program in the time of input, just enter \"{CommandExit}\".\n" +
                 $"{Indent}Or \"{CommandBack}\" to back on one step ago.\n" +
@@ -110,27 +119,25 @@ namespace MiniBot.Activity
 
         public void DoAction(string command)
         {
-            if (!CheckCommand(ref command))
-            {
-                return;
-            }
-
             switch (State)
             {
                 case BotState.Sleep:
                     ExitSystem();
                     break;
-                case BotState.Start:                    
+                case BotState.Start:
                     if (accountWorker.CheckJson())
                     {
                         SendMessage(DefaultString, BotState.AccountDecision);
                     }
                     else
                     {
-                        SendMessage("Well, to take an order you should have an account. Let's create it.", BotState.Write);
+                        SendMessage("Well, to take an order you should have an account. Let's create it.");
                         State = BotState.AccountDecision;
                         CreateAccount();
                     }
+                    break;
+                case BotState.WriteAndWait:
+                    GetAnswer();
                     break;
                 case BotState.AccountDecision:
                     State = BotState.Write;
@@ -147,34 +154,48 @@ namespace MiniBot.Activity
                         default:
                             SendMessage("Sorry, I don't understand you :(", BotState.AccountDecision);
                             break;
-                    }   
+                    }
                     break;
                 case BotState.FindAccount:
-                    if (BackFromAccount(_buffer))
+                    while (true)
                     {
-                        SendMessage(DefaultString, BotState.AccountDecision);
-                        break;
-                    }
-                    string[] array = command.Split(' ');
-                    if (command.Contains(" ") && array.Length == 2)
-                    {
-                        var emailAttribute = (EmailAttribute)typeof(UserAccount).GetProperty("Login").GetCustomAttributes(false).First(x => x.GetType() == typeof(EmailAttribute));
-
-                        if (CheckEmail(array[0]))
+                        if (BackFromAccount(_buffer))
                         {
-                            if (accountWorker.FindAccount(array[0], array[1], ref _account))
+                            SendMessage(DefaultString, BotState.AccountDecision);
+                            break;
+                        }
+
+                        string[] array = command.Split(' ');
+                        if (command.Contains(" ") && array.Length == 2)
+                        {
+                            var emailAttribute = (EmailAttribute)typeof(UserAccount).GetProperty("Login").GetCustomAttributes(false).First(x => x.GetType() == typeof(EmailAttribute));
+
+                            if (CheckEmail(array[0]))
                             {
-                                SubscribeAccount();
-                                SendMessage($"Welcome, {_account.Name}! " + DefaultString, BotState.AskProduct);
+                                if (accountWorker.FindAccount(array[0], array[1], ref _account))
+                                {
+                                    SubscribeAccount();
+                                    SendMessage($"Welcome, {_account.Name}! " + DefaultString, BotState.AskProduct);
+                                    break;
+                                }
+                                else
+                                {
+                                    WriteLineMessage($"Incorrect email or password! Try again.");
+                                    command = ReadMessage();
+                                }
                             }
                             else
-                                SendMessage($"Incorrect email or password! Try again.", BotState.FindAccount);
+                            {
+                                WriteLineMessage($"Incorrect email format!");
+                                command = ReadMessage();
+                            }
                         }
                         else
-                            SendMessage($"Incorrect email format!", BotState.FindAccount);
+                        {
+                            WriteLineMessage($"Bad input value. Enter your login and password throuh a whitespace. Example: \"example@example.com 1234\". To come back enter \"{CommandBack}\"");
+                            command = ReadMessage();
+                        }
                     }
-                    else
-                        SendMessage($"Bad input value. Enter your login and password throuh a whitespace. Example: \"example@example.com 1234\". To come back enter \"{CommandBack}\"", BotState.FindAccount);
                     break;
                 case BotState.AskProduct:
                     switch (command)
@@ -214,8 +235,7 @@ namespace MiniBot.Activity
                             SendMessage(DefaultString, BotState.ShowBasket);
                             break;
                         default:
-                            WriteBotName(true);
-                            Console.Write("Information about ");
+                            WriteMessage("Information about ");
                             _currentProduct = _dbWorker.GetById(_currentID);
                             _currentProduct.ShowInfo(Indent);
                             SendMessage(DefaultString, BotState.ProductDecision);
@@ -241,14 +261,13 @@ namespace MiniBot.Activity
                     break;
                 case BotState.AskAmount:
                     short amount = 0;
-                    if (!Int16.TryParse(_buffer, out amount))
+                    while (!Int16.TryParse(_buffer, out amount))
                     {
-                        SendMessage("Enter an integer number!");
-                        break;
+                        WriteLineMessage("Enter an integer number!");
+                        ReadMessage();
                     }
-                    _account.Basket.Add(_currentProduct, _currentID , amount);
-                    State = BotState.ShowMenu;
-                    GetAnswer();
+                    _account.Basket.Add(_currentProduct, _currentID, amount);
+                    SendMessage(DefaultString, BotState.ShowMenu);
                     break;
                 case BotState.ShowBasket:
                     switch (command)
@@ -263,12 +282,11 @@ namespace MiniBot.Activity
                             SendMessage(DefaultString, BotState.AskAdress);
                             break;
                         default:
-                            WriteBotName(true);
-                            Console.Write("Information about ");
+                            WriteMessage("Information about ");
 
                             _currentProduct = _dbWorker.GetById(_currentID);
                             _currentProduct.ShowInfo(Indent);
-                            
+
                             SendMessage(DefaultString, BotState.ProductInBusket);
                             break;
                     }
@@ -348,8 +366,8 @@ namespace MiniBot.Activity
             {
 
                 ShowProductsChoices(_dbWorker.GetFromDB(x => x.GetType() == _currentType));
-                
-                AddChoice(_delimiter); 
+
+                AddChoice(_delimiter);
                 if (_account.Basket.Count > 0)
                     AddChoice(ChoiceSeeBasket);
                 AddChoice(ChoiceBack);
@@ -398,17 +416,22 @@ namespace MiniBot.Activity
             else if (State != BotState.Sleep && State != BotState.Write)
             {
                 WriteBotName(false);
-                _buffer = Console.ReadLine();
+
+                do
+                {
+                    _buffer = Console.ReadLine();
+                } while (!CheckCommand());
             }
 
-            DoAction(_buffer);
+            if (_isAuto)
+                DoAction(_buffer);
         }
 
-        public void SendMessage(string msg, BotState nextstate)
+        public void SendMessage(string msg, BotState nextState = BotState.Write)
         {
             if (String.IsNullOrEmpty(msg))
             {
-                switch (nextstate)
+                switch (nextState)
                 {
                     case BotState.Sleep:
                         msg = "Thank you";
@@ -469,19 +492,36 @@ namespace MiniBot.Activity
                 }
             }
 
-            State = nextstate;
-            SendMessage(msg);
+            State = nextState;
+
+            WriteLineMessage(msg);
+
+            GetAnswer();
         }
         #endregion
 
-        #region Private methods
-        private void SendMessage(string msg, bool isAuto = true)
+        public string GetBuffer()
         {
-            WriteBotName(true);
-            Console.WriteLine(msg);
+            return _buffer;
+        }
 
-            if (isAuto)
-                GetAnswer();
+        #region Private methods
+        private string ReadMessage()
+        {
+            WriteBotName(false);
+            return _buffer = Console.ReadLine();
+        }
+
+        private void WriteLineMessage(string msg, bool isbot = true)
+        {
+            WriteMessage(msg, isbot);
+            Console.WriteLine();
+        }
+
+        private void WriteMessage(string msg, bool isbot = true)
+        {
+            WriteBotName(isbot);
+            Console.Write(msg);
         }
 
         private void WriteBotName(bool isbot)
@@ -506,9 +546,9 @@ namespace MiniBot.Activity
 
             if (State == BotState.AccountDecision)
             {
-                
+
                 SendMessage(DefaultString, BotState.AccName);
-                
+
                 if (BackFromAccount(_buffer))
                 {
                     SendMessage(DefaultString, BotState.AccountDecision);
@@ -526,14 +566,14 @@ namespace MiniBot.Activity
                         SendMessage(DefaultString, BotState.AccountDecision);
                         return;
                     }
-                    
+
                     string[] date = _buffer.Split('.');
                     if (date.ToList().Count != 3)
                     {
                         SendMessage("Bad input format! Format is DD.MM.YYYY");
                         continue;
                     }
-                    
+
                     int dd = 0, mm = 0, yy = 0;
                     if (Int32.TryParse(date[0], out dd) && Int32.TryParse(date[1], out mm) && Int32.TryParse(date[2], out yy))
                     {
@@ -552,7 +592,7 @@ namespace MiniBot.Activity
                         SendMessage("Format is DD.MM.YYYY");
                         continue;
                     }
-                    
+
                     break;
                 }
 
@@ -611,23 +651,25 @@ namespace MiniBot.Activity
                 return false;
         }
 
-        private bool CheckCommand(ref string command)
+        private bool CheckCommand()
         {
-            if (command.Length == 0)
+            if (_buffer.Length == 0)
             {
-                SendMessage("Please, enter something!");
+                WriteLineMessage("Please, enter something!");
+                WriteBotName(false);
                 return false;
             }
 
-            command = command.ToLower();
+            _buffer = _buffer.ToLower();
 
-            if (command[0].Equals('-') && !command[1].Equals('>') && !IsCommand(command))
+            if (_buffer.Length > 1 && _buffer[0].Equals('-') && !_buffer[1].Equals('>') && !IsCommand(_buffer) || _buffer.Length == 1 && _buffer[0].Equals('-'))
             {
-                SendMessage("I don't know this command :(");
+                WriteLineMessage("I don't know this command :(");
+                WriteBotName(false);
                 return false;
             }
 
-            if (Equals(command, CommandExit))
+            if (Equals(_buffer, CommandExit))
                 ExitSystem();
 
             return true;
@@ -666,7 +708,7 @@ namespace MiniBot.Activity
             Console.WriteLine();
             Thread.Sleep(500);
 
-            Environment.Exit(code);
+            //Environment.Exit(code);
         }
         #endregion
 
@@ -681,19 +723,19 @@ namespace MiniBot.Activity
         private static void OrderCompleted(string email, string message)
         {
             Console.WriteLine("complited");
-            SendEmail(email, message);
+            //SendEmail(email, message);
         }
 
         private static void OrderDelivered(string email, string message)
         {
             Console.WriteLine("delivered");
-            SendEmail(email, message);
+            //SendEmail(email, message);
         }
 
         private static void OrderPaid(string email, string message)
         {
             Console.WriteLine("paid");
-            SendEmail(email, message);
+            //SendEmail(email, message);
         }
 
         private static void SendEmail(string email, string message)
