@@ -17,7 +17,7 @@ namespace MiniBot
             AssistantBot bot = new AssistantBot();
             Math.Abs(3);
             Logger logger = new Logger();
-            logger.Mode = Mode.File;
+            logger.Mode = Mode.Console;
 
             //string s = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
 

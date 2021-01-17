@@ -54,51 +54,78 @@ namespace LogInfo
             _isInited = true;
         }
 
-        public void Info(string message)
+        public void Info(string message, object obj = null)
         {
             if (!_isInited)
                 throw new LogException("a");
 
-            Log(INF, message);
+            Log(INF, message, obj);
         }
 
-        public void Debug(string message)
+        public void Debug(string message, object obj = null)
         {
             if (!_isInited)
                 throw new LogException("a");
 
             if (_isDebug)
-                Log(DBG, message);
+                Log(DBG, message, obj);
         }
 
-        public void Error(string message)
+        public void Error(string message, object obj = null)
         {
             if (!_isInited)
                 throw new LogException("a");
 
-            Log(ERR, message);
+            Log(ERR, message, obj);
         }
 
-        private void Log(string mode, string message)
+        private void Log(string mode, string message, object obj)
         {
             StackTrace stackTrace = new StackTrace();
-            
+
+            string content = "Location: " + stackTrace.GetFrame(2).GetMethod().DeclaringType + ", " + stackTrace.GetFrame(2).GetMethod().Name + "()\n" +
+                             "Thread info. " +
+                             "Name: " + (Thread.CurrentThread.Name == null ? "None" : Thread.CurrentThread.Name) + ", " +
+                             "priority: " + Thread.CurrentThread.Priority + ", " +
+                             "managed ID: " + Thread.CurrentThread.ManagedThreadId + ", " +
+                             "state: " + Thread.CurrentThread.ThreadState + ", " +
+                             "is alive: " + Thread.CurrentThread.IsAlive + ", " +
+                             "is background: " + Thread.CurrentThread.IsBackground + ".\n" +
+                             "Message: " + message + "\n";
+
+            if (obj != null)
+            {
+                Type type = obj.GetType();
+
+                content += "Object info(" + type.ToString() + "): ";
+
+                string propertyValue;
+
+                foreach (var property in type.GetProperties())
+                {
+                    try
+                    {
+                        propertyValue = property.GetValue(obj).ToString();
+                        content += property.Name + ": \"" + propertyValue + "\"; ";
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+                }
+
+                content += "\n";
+            }
+
             if (Mode == Mode.File)
             {
                 DateTime nowTime = DateTime.Now;
                 TimeSpan timeSpan = nowTime - nowTime.ToUniversalTime();
 
-                string content = nowTime.ToUniversalTime() + " " + 
+                content = nowTime.ToUniversalTime() + " " +
                     (timeSpan.TotalMinutes >= 0 ? "+" : "-") + timeSpan.ToString("hh\\:mm") + " " +
-                    "[" + mode + "] " + message + "\n" + 
-                    "Location: " + stackTrace.GetFrame(2).GetMethod().DeclaringType + ", " + stackTrace.GetFrame(2).GetMethod().Name  + "()\n" + 
-                    "Thread info. " +
-                    "Name: " + (Thread.CurrentThread.Name == null ? "None" : Thread.CurrentThread.Name) + ", " +
-                    "priority: " + Thread.CurrentThread.Priority + ", " +
-                    "managed ID: " + Thread.CurrentThread.ManagedThreadId + ", " +
-                    "state: " + Thread.CurrentThread.ThreadState + ", " +
-                    "is alive: " + Thread.CurrentThread.IsAlive + ", " +
-                    "is background: " + Thread.CurrentThread.IsBackground + ".\n";
+                    "[" + mode + "] " +
+                    content;
 
                 string fileName = CreateFileName();
 
@@ -145,15 +172,7 @@ namespace LogInfo
                 Console.Write(mode);
                 Console.ResetColor();
 
-                Console.WriteLine("] " + message + "\n" +
-                    "Location: " + stackTrace.GetFrame(2).GetMethod().DeclaringType + ", " + stackTrace.GetFrame(2).GetMethod().Name + "()\n" +
-                    "Thread info. " +
-                    "Name: " + (Thread.CurrentThread.Name == null ? "None" : Thread.CurrentThread.Name) + ", " +
-                    "priority: " + Thread.CurrentThread.Priority + ", " +
-                    "managed ID: " + Thread.CurrentThread.ManagedThreadId + ", " +
-                    "state: " + Thread.CurrentThread.ThreadState + ", " +
-                    "is alive: " + Thread.CurrentThread.IsAlive + ", " +
-                    "is background: " + Thread.CurrentThread.IsBackground + ".\n");
+                Console.WriteLine("] " + content);
             }
         }
 

@@ -55,6 +55,11 @@ namespace MiniBot.Activity
                 Basket = null;
                 BirthDate = DateTime.MinValue;
             }
+
+            public bool IsAdult()
+            {
+                return DateTime.Now.Year - this.BirthDate.Year > 18 || (DateTime.Now.Year - this.BirthDate.Year == 18 && DateTime.Now.Month >= this.BirthDate.Month);
+            }
         }
 
         #region Fields
@@ -224,7 +229,13 @@ namespace MiniBot.Activity
                             SendMessage(DefaultString, BotState.ShowMenu);
                             break;
                         case ChoiceTake:
-                            SendMessage(DefaultString, BotState.AskAmount);
+                            if (_currentProduct is Drink && (_currentProduct as Drink).IsAlcohol && !_account.IsAdult())
+                            {
+                                SendMessage("You can't buy alcohol drinks!", BotState.Write);
+                                SendMessage(DefaultString, BotState.ShowMenu);
+                            }
+                            else
+                                SendMessage(DefaultString, BotState.AskAmount);
                             break;
                     }
                     break;
@@ -335,6 +346,7 @@ namespace MiniBot.Activity
             }
             else if (State == BotState.ShowMenu)
             {
+
                 ShowProductsChoices(_dbWorker.GetFromDB(x => x.GetType() == _currentType));
                 
                 AddChoice(_delimiter); 
