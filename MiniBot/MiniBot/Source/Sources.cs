@@ -11,45 +11,47 @@ namespace MiniBot.Activity
 {
     static class Sources
     {
-        private static ResourceManager _resourceManager;
+        public static ResourceManager ResourceManager;
         static Sources()
         {
-            _resourceManager = new ResourceManager("MiniBot.Resourcers.Localization", Assembly.GetExecutingAssembly());
+            ResourceManager = new ResourceManager("MiniBot.Resourcers.Localization", Assembly.GetExecutingAssembly());
 
-            ChoiceLogin = "->" + _resourceManager.GetString("login", CultureInfo.CurrentCulture);
-            ChoiceRegister = "->" + _resourceManager.GetString("register", CultureInfo.CurrentCulture);
-            ChoicePizza = "->" + _resourceManager.GetString("pizza", CultureInfo.CurrentCulture);
-            ChoiceSushi = "->" + _resourceManager.GetString("sushi", CultureInfo.CurrentCulture);
-            ChoiceDrink = "->" + _resourceManager.GetString("drink", CultureInfo.CurrentCulture);
-            ChoiceBack = "->" + _resourceManager.GetString("back", CultureInfo.CurrentCulture);
-            ChoiceTake = "->" + _resourceManager.GetString("take", CultureInfo.CurrentCulture);
-            ChoiceSeeBasket = "->" + _resourceManager.GetString("see basket", CultureInfo.CurrentCulture);
-            ChoiceBuy = "->" + _resourceManager.GetString("buy", CultureInfo.CurrentCulture);
-            ChoiceRemove = "->" + _resourceManager.GetString("remove", CultureInfo.CurrentCulture);
-            ChoiceReduce = "->" + _resourceManager.GetString("reduce", CultureInfo.CurrentCulture);
-            ChoiceEnlarge = "->" + _resourceManager.GetString("enlarge", CultureInfo.CurrentCulture);
-            ChoiceExit = "->" + _resourceManager.GetString("exit", CultureInfo.CurrentCulture);
+            ChoiceLogin = "->" + ResourceManager.GetString("login", CultureInfo.CurrentCulture);
+            ChoiceRegister = "->" + ResourceManager.GetString("register", CultureInfo.CurrentCulture);
+            ChoicePizza = "->" + ResourceManager.GetString("pizza", CultureInfo.CurrentCulture);
+            ChoiceSushi = "->" + ResourceManager.GetString("sushi", CultureInfo.CurrentCulture);
+            ChoiceDrink = "->" + ResourceManager.GetString("drink", CultureInfo.CurrentCulture);
+            ChoiceBack = "->" + ResourceManager.GetString("back", CultureInfo.CurrentCulture);
+            ChoiceTake = "->" + ResourceManager.GetString("take", CultureInfo.CurrentCulture);
+            ChoiceSeeBasket = "->" + ResourceManager.GetString("see basket", CultureInfo.CurrentCulture);
+            ChoiceBuy = "->" + ResourceManager.GetString("buy", CultureInfo.CurrentCulture);
+            ChoiceRemove = "->" + ResourceManager.GetString("remove", CultureInfo.CurrentCulture);
+            ChoiceReduce = "->" + ResourceManager.GetString("reduce", CultureInfo.CurrentCulture);
+            ChoiceEnlarge = "->" + ResourceManager.GetString("enlarge", CultureInfo.CurrentCulture);
+            ChoiceExit = "->" + ResourceManager.GetString("exit", CultureInfo.CurrentCulture);
 
-            mailTitle = _resourceManager.GetString("Order", CultureInfo.CurrentCulture);
+            mailTitle = ResourceManager.GetString("Order", CultureInfo.CurrentCulture);
 
-            guestName = _resourceManager.GetString("Guest", CultureInfo.CurrentCulture);
+            guestName = ResourceManager.GetString("Guest", CultureInfo.CurrentCulture);
 
-            Cost = _resourceManager.GetString("Cost", CultureInfo.CurrentCulture);
-            Discount = _resourceManager.GetString("Discount", CultureInfo.CurrentCulture);
-            Description = _resourceManager.GetString("Description", CultureInfo.CurrentCulture); 
-            Volume = _resourceManager.GetString("Volume", CultureInfo.CurrentCulture);
-            g = _resourceManager.GetString("g", CultureInfo.CurrentCulture);
-            WithGase = _resourceManager.GetString("With gase", CultureInfo.CurrentCulture);
-            WithoutGase = _resourceManager.GetString("Without gase", CultureInfo.CurrentCulture);
-            Alcoholic = _resourceManager.GetString("Alcoholic", CultureInfo.CurrentCulture);
-            NotAlcoholic = _resourceManager.GetString("Not alcoholic", CultureInfo.CurrentCulture);
-            Score = _resourceManager.GetString("Score", CultureInfo.CurrentCulture);
-            Composition = _resourceManager.GetString("Composition", CultureInfo.CurrentCulture);
-            Weight = _resourceManager.GetString("Weight", CultureInfo.CurrentCulture);
-            Raw = _resourceManager.GetString("Raw", CultureInfo.CurrentCulture);
-            Fried = _resourceManager.GetString("Fried", CultureInfo.CurrentCulture);
-            Size = _resourceManager.GetString("Size", CultureInfo.CurrentCulture);
-            sm = _resourceManager.GetString("sm", CultureInfo.CurrentCulture);
+            Cost = ResourceManager.GetString("Cost", CultureInfo.CurrentCulture);
+            Discount = ResourceManager.GetString("Discount", CultureInfo.CurrentCulture);
+            Description = ResourceManager.GetString("Description", CultureInfo.CurrentCulture); 
+            Volume = ResourceManager.GetString("Volume", CultureInfo.CurrentCulture);
+            g = ResourceManager.GetString("g", CultureInfo.CurrentCulture);
+            WithGase = ResourceManager.GetString("With gase", CultureInfo.CurrentCulture);
+            WithoutGase = ResourceManager.GetString("Without gase", CultureInfo.CurrentCulture);
+            Alcoholic = ResourceManager.GetString("Alcoholic", CultureInfo.CurrentCulture);
+            NotAlcoholic = ResourceManager.GetString("Not alcoholic", CultureInfo.CurrentCulture);
+            Score = ResourceManager.GetString("Score", CultureInfo.CurrentCulture);
+            Composition = ResourceManager.GetString("Composition", CultureInfo.CurrentCulture);
+            Weight = ResourceManager.GetString("Weight", CultureInfo.CurrentCulture);
+            Raw = ResourceManager.GetString("Raw", CultureInfo.CurrentCulture);
+            Fried = ResourceManager.GetString("Fried", CultureInfo.CurrentCulture);
+            Size = ResourceManager.GetString("Size", CultureInfo.CurrentCulture);
+            sm = ResourceManager.GetString("sm", CultureInfo.CurrentCulture);
+
+            Total = ResourceManager.GetString("Total", CultureInfo.CurrentCulture);
         }
 
         public enum BotState : byte
@@ -127,6 +129,8 @@ namespace MiniBot.Activity
         public static readonly string Fried;
         public static readonly string Size;
         public static readonly string sm;
+
+        public static readonly string Total;
 
         public static bool IsCommand(string command)
         {

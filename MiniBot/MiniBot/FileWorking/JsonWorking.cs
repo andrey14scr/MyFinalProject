@@ -35,7 +35,7 @@ namespace MiniBot.Activity
 
                 List<T> accountsList = new List<T>();
 
-                using (StreamReader sr = new StreamReader("Resources\\accounts.json"))
+                using (StreamReader sr = new StreamReader(_path))
                 {
                     try
                     {

@@ -117,14 +117,26 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccDecision" xml:space="preserve">
+    <value>Do you want to register a new account or you can log in the existing one?</value>
+  </data>
+  <data name="AccountAlert" xml:space="preserve">
+    <value>Well, to take an order you should have an account. Let's create it.</value>
+  </data>
   <data name="Alcoholic" xml:space="preserve">
     <value>Alcoholic</value>
   </data>
   <data name="back" xml:space="preserve">
     <value>back</value>
   </data>
+  <data name="Bad input format" xml:space="preserve">
+    <value>Bad input format!</value>
+  </data>
   <data name="buy" xml:space="preserve">
     <value>buy</value>
+  </data>
+  <data name="Can'tBuyAlco" xml:space="preserve">
+    <value>You can't buy alcohol drinks!</value>
   </data>
   <data name="cm" xml:space="preserve">
     <value>cm</value>
@@ -135,6 +147,9 @@
   <data name="Cost" xml:space="preserve">
     <value>Cost</value>
   </data>
+  <data name="DateFormat" xml:space="preserve">
+    <value>Format is DD.MM.YYYY.</value>
+  </data>
   <data name="Description" xml:space="preserve">
     <value>Description</value>
   </data>
@@ -144,11 +159,44 @@
   <data name="drink" xml:space="preserve">
     <value>drink</value>
   </data>
+  <data name="Empty" xml:space="preserve">
+    <value>&lt;Empty&gt;</value>
+  </data>
   <data name="enlarge" xml:space="preserve">
     <value>enlarge</value>
   </data>
+  <data name="Enter" xml:space="preserve">
+    <value>Enter</value>
+  </data>
+  <data name="EnterAdress" xml:space="preserve">
+    <value>Enter your adress, please</value>
+  </data>
+  <data name="EnterBirthDate" xml:space="preserve">
+    <value>Enter your birth date in format DD.MM.YYYY</value>
+  </data>
+  <data name="EnterInt" xml:space="preserve">
+    <value>Enter an integer number!</value>
+  </data>
+  <data name="EnterLogin" xml:space="preserve">
+    <value>Enter your login, please</value>
+  </data>
+  <data name="EnterLogPas" xml:space="preserve">
+    <value>Enter your login and password through a whitespace</value>
+  </data>
+  <data name="EnterName" xml:space="preserve">
+    <value>Enter your name, please</value>
+  </data>
+  <data name="EnterPassword" xml:space="preserve">
+    <value>Enter your password, please</value>
+  </data>
+  <data name="EnterSmt" xml:space="preserve">
+    <value>Please, enter something!</value>
+  </data>
   <data name="exit" xml:space="preserve">
     <value>exit</value>
+  </data>
+  <data name="Finishing" xml:space="preserve">
+    <value>Finishing</value>
   </data>
   <data name="Fried" xml:space="preserve">
     <value>Fried</value>
@@ -159,6 +207,27 @@
   <data name="Guest" xml:space="preserve">
     <value>Guest</value>
   </data>
+  <data name="Hello1" xml:space="preserve">
+    <value>Hello, I am</value>
+  </data>
+  <data name="Hello2" xml:space="preserve">
+    <value>- your bot assistant, that can help you to take an order.</value>
+  </data>
+  <data name="Hello3" xml:space="preserve">
+    <value>Answer something to start.</value>
+  </data>
+  <data name="Henry" xml:space="preserve">
+    <value>Henry</value>
+  </data>
+  <data name="HowMany" xml:space="preserve">
+    <value>How many do you want?</value>
+  </data>
+  <data name="Incorrect email format" xml:space="preserve">
+    <value>Incorrect email format!</value>
+  </data>
+  <data name="InfoAbout" xml:space="preserve">
+    <value>Information about</value>
+  </data>
   <data name="login" xml:space="preserve">
     <value>login</value>
   </data>
@@ -167,6 +236,15 @@
   </data>
   <data name="Order" xml:space="preserve">
     <value>Order</value>
+  </data>
+  <data name="Order is delivered" xml:space="preserve">
+    <value>Order is delivered! Don't forget to take it.</value>
+  </data>
+  <data name="Order is paid" xml:space="preserve">
+    <value>Order is paid! Thank you.</value>
+  </data>
+  <data name="Our menu" xml:space="preserve">
+    <value>Our menu</value>
   </data>
   <data name="pizza" xml:space="preserve">
     <value>pizza</value>
@@ -189,6 +267,9 @@
   <data name="see basket" xml:space="preserve">
     <value>see basket</value>
   </data>
+  <data name="ShouldHaveAcc" xml:space="preserve">
+    <value>Well, to take an order you should have an account.</value>
+  </data>
   <data name="Size" xml:space="preserve">
     <value>Size</value>
   </data>
@@ -198,16 +279,43 @@
   <data name="take" xml:space="preserve">
     <value>take</value>
   </data>
+  <data name="Thank you" xml:space="preserve">
+    <value>Thank you!</value>
+  </data>
+  <data name="ToConfirm" xml:space="preserve">
+    <value>to confirm order</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="TotalPrice" xml:space="preserve">
+    <value>The total price is</value>
+  </data>
+  <data name="Try again" xml:space="preserve">
+    <value>Try again.</value>
+  </data>
+  <data name="UnknownCommand" xml:space="preserve">
+    <value>I don't know this command :(</value>
+  </data>
   <data name="Volume" xml:space="preserve">
     <value>Volume</value>
   </data>
   <data name="Weight" xml:space="preserve">
     <value>Weight</value>
   </data>
+  <data name="WhatToOrder" xml:space="preserve">
+    <value>What do you want to order?</value>
+  </data>
   <data name="With gase" xml:space="preserve">
     <value>With gase</value>
   </data>
   <data name="Without gase" xml:space="preserve">
     <value>Without gase</value>
+  </data>
+  <data name="Your basket" xml:space="preserve">
+    <value>Your basket</value>
+  </data>
+  <data name="Your decision" xml:space="preserve">
+    <value>Your decision</value>
   </data>
 </root>

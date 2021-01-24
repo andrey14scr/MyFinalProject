@@ -11,6 +11,7 @@ using System.IO;
 using LogInfo;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace MiniBot.Activity
 {
@@ -35,17 +36,17 @@ namespace MiniBot.Activity
 
             public void SendCompleted()
             {
-                OrderCompleted?.Invoke(Login, "Order is completed!");
+                OrderCompleted?.Invoke(Login, Sources.ResourceManager.GetString("Order is completed", CultureInfo.CurrentCulture));
             }
 
             public void SendDelivered()
             {
-                OrderDelivered?.Invoke(Login, "Order is delivered! Don't forget to take it.");
+                OrderDelivered?.Invoke(Login, Sources.ResourceManager.GetString("Order is delivered", CultureInfo.CurrentCulture));
             }
 
             public void SendPaid()
             {
-                OrderPaid?.Invoke(Login, "Order is paid! Thank you.");
+                OrderPaid?.Invoke(Login, Sources.ResourceManager.GetString("Order is paid", CultureInfo.CurrentCulture));
             }
 
             public void Exit()
@@ -90,11 +91,11 @@ namespace MiniBot.Activity
         #endregion
 
         #region Ctors
-        public AssistantBot() : this("Henry", true) { }
+        public AssistantBot() : this(Sources.ResourceManager.GetString("Henry", CultureInfo.CurrentCulture), true) { }
 
         public AssistantBot(string botname) : this(botname, true) { }
 
-        public AssistantBot(bool isAuto) : this("Henry", isAuto) { }
+        public AssistantBot(bool isAuto) : this(Sources.ResourceManager.GetString("Henry", CultureInfo.CurrentCulture), isAuto) { }
 
         public AssistantBot(string botname, bool isAuto)
         {
@@ -111,10 +112,10 @@ namespace MiniBot.Activity
             if (!_isAuto)
                 return;
 
-            SendMessage($"Hello, I am {BotName} - your bot assistant, that can help you to take an order.\n" +
-                $"{Indent}If you want to exit from the program in the time of input, just enter \"{CommandExit}\".\n" +
-                $"{Indent}Or \"{CommandBack}\" to back on one step ago.\n" +
-                $"{Indent}Answer something to start.", BotState.Start);
+            SendMessage($"{Sources.ResourceManager.GetString("Hello1", CultureInfo.CurrentCulture)} {BotName} {Sources.ResourceManager.GetString("Hello2", CultureInfo.CurrentCulture)}\n" +
+                //$"{Indent}If you want to exit from the program in the time of input, just enter \"{CommandExit}\".\n" +
+                //$"{Indent}Or \"{CommandBack}\" to back on one step ago.\n" +
+                $"{Indent}{Sources.ResourceManager.GetString("Hello3", CultureInfo.CurrentCulture)}", BotState.Start);
         }
 
         public void DoAction(string command)
@@ -131,7 +132,7 @@ namespace MiniBot.Activity
                     }
                     else
                     {
-                        SendMessage("Well, to take an order you should have an account. Let's create it.");
+                        SendMessage(Sources.ResourceManager.GetString("AccountAlert", CultureInfo.CurrentCulture));
                         State = BotState.AccountDecision;
                         CreateAccount();
                     }
@@ -140,7 +141,6 @@ namespace MiniBot.Activity
                     GetAnswer();
                     break;
                 case BotState.AccountDecision:
-                    State = BotState.Write;
                     if (command.Equals(ChoiceRegister))
                     {
                         State = BotState.AccountDecision;
@@ -150,10 +150,6 @@ namespace MiniBot.Activity
                     {
                         State = BotState.FindAccount;
                         SendMessage(DefaultString, BotState.FindAccount);
-                    }
-                    else
-                    {
-                        SendMessage("Sorry, I don't understand you :(", BotState.AccountDecision);
                     }
                     break;
                 case BotState.FindAccount:
@@ -243,18 +239,19 @@ namespace MiniBot.Activity
                         switch (_currentProduct)
                         {
                             case Pizza:
-                                typeProduct = "pizza ";
+                                typeProduct = Sources.ResourceManager.GetString("pizza", CultureInfo.CurrentCulture);
                                 break;
                             case Sushi:
-                                typeProduct = "sushi ";
+                                typeProduct = Sources.ResourceManager.GetString("sushi", CultureInfo.CurrentCulture);
                                 break;
                             case Drink:
-                                typeProduct = "drink ";
+                                typeProduct = Sources.ResourceManager.GetString("drink", CultureInfo.CurrentCulture);
                                 break;
                             default:
                                 break;
                         }
-                        WriteMessage("Information about " + typeProduct);
+                        typeProduct += " ";
+                        WriteMessage(Sources.ResourceManager.GetString("InfoAbout", CultureInfo.CurrentCulture) + " " + typeProduct);
                         _currentProduct.ShowInfo(Indent);
                         SendMessage(DefaultString, BotState.ProductDecision);
                     }
@@ -268,7 +265,7 @@ namespace MiniBot.Activity
                     {
                         if (_currentProduct is Drink && (_currentProduct as Drink).IsAlcohol && !_account.IsAdult())
                         {
-                            SendMessage("You can't buy alcohol drinks!", BotState.Write);
+                            SendMessage(Sources.ResourceManager.GetString("Can'tBuyAlco", CultureInfo.CurrentCulture), BotState.Write);
                             SendMessage(DefaultString, BotState.ShowMenu);
                         }
                         else
@@ -279,7 +276,7 @@ namespace MiniBot.Activity
                     short amount = 0;
                     while (!Int16.TryParse(_buffer, out amount))
                     {
-                        WriteLineMessage("Enter an integer number!");
+                        WriteLineMessage(Sources.ResourceManager.GetString("EnterInt", CultureInfo.CurrentCulture));
                         ReadMessage();
                     }
                     _account.Basket.Add(_currentProduct, _currentID, amount);
@@ -299,7 +296,7 @@ namespace MiniBot.Activity
                     }
                     else
                     {
-                        WriteMessage("Information about ");
+                        WriteMessage(Sources.ResourceManager.GetString("InfoAbout", CultureInfo.CurrentCulture) + " ");
 
                         _currentProduct = _dbWorker.GetById(_currentID);
                         _currentProduct.ShowInfo(Indent);
@@ -344,7 +341,7 @@ namespace MiniBot.Activity
                             ExitSystem();
                             break;
                         default:
-                            SendMessage("I don't understand you :(", BotState.Confirm);
+                            SendMessage(Sources.ResourceManager.GetString("UnknownCommand", CultureInfo.CurrentCulture), BotState.Confirm);
                             break;
                     }
                     break;
@@ -402,7 +399,7 @@ namespace MiniBot.Activity
             {
                 if (_account.Basket.Count == 0)
                 {
-                    Console.WriteLine(Indent + "<Empty>");
+                    Console.WriteLine(Indent + Sources.ResourceManager.GetString("Empty", CultureInfo.CurrentCulture));
                 }
                 else
                 {
@@ -450,7 +447,7 @@ namespace MiniBot.Activity
                 switch (nextState)
                 {
                     case BotState.Sleep:
-                        msg = "Thank you";
+                        msg = Sources.ResourceManager.GetString("Thank you", CultureInfo.CurrentCulture);
                         break;
                     case BotState.Start:
                         break;
@@ -459,49 +456,49 @@ namespace MiniBot.Activity
                     case BotState.WriteAndWait:
                         break;
                     case BotState.AccName:
-                        msg = "Enter your name, please";
+                        msg = Sources.ResourceManager.GetString("EnterName", CultureInfo.CurrentCulture);
                         break;
                     case BotState.AccBirthDate:
-                        msg = "Enter your birth date in format DD.MM.YYYY";
+                        msg = Sources.ResourceManager.GetString("EnterBirthDate", CultureInfo.CurrentCulture);
                         break;
                     case BotState.AccLogin:
-                        msg = "Enter your login, please";
+                        msg = Sources.ResourceManager.GetString("EnterLogin", CultureInfo.CurrentCulture);
                         break;
                     case BotState.AccPassword:
-                        msg = "Enter your password, please";
+                        msg = Sources.ResourceManager.GetString("EnterPassword", CultureInfo.CurrentCulture);
                         break;
                     case BotState.AccountDecision:
-                        msg = "Well, to take an order you should have an account.\n" +
-                        $"{Indent}Do you want to register a new account or you can log in the existing one?";
+                        msg = Sources.ResourceManager.GetString("ShouldHaveAcc", CultureInfo.CurrentCulture) + "\n" +
+                        $"{Indent}{Sources.ResourceManager.GetString("AccDecision", CultureInfo.CurrentCulture)}";
                         break;
                     case BotState.FindAccount:
-                        msg = "Enter your login and password through a whitespace";
+                        msg = Sources.ResourceManager.GetString("EnterLogPas", CultureInfo.CurrentCulture);
                         break;
                     case BotState.ShowMenu:
-                        msg = "Our menu:";
+                        msg = Sources.ResourceManager.GetString("Our menu", CultureInfo.CurrentCulture) + ":";
                         break;
                     case BotState.AskProduct:
-                        msg = "What do you want to order?";
+                        msg = Sources.ResourceManager.GetString("WhatToOrder", CultureInfo.CurrentCulture);
                         break;
                     case BotState.ShowProduct:
                         break;
                     case BotState.ProductDecision:
-                        msg = "Your decision";
+                        msg = Sources.ResourceManager.GetString("Your decision", CultureInfo.CurrentCulture);
                         break;
                     case BotState.ProductInBusket:
                         msg = _account.Basket.GetItemInfoById(_currentID);
                         break;
                     case BotState.AskAmount:
-                        msg = "How many do you want?";
+                        msg = Sources.ResourceManager.GetString("HowMany", CultureInfo.CurrentCulture);
                         break;
                     case BotState.ShowBasket:
-                        msg = "Your basket:";
+                        msg = Sources.ResourceManager.GetString("Your basket", CultureInfo.CurrentCulture) + ":";
                         break;
                     case BotState.Confirm:
-                        msg = $"The total price is {_account.Basket.TotalPrice:$0.00}. Enter \"-agree\" to confirm order.";
+                        msg = $"{Sources.ResourceManager.GetString("TotalPrice", CultureInfo.CurrentCulture)} {_account.Basket.TotalPrice:$0.00}. {Sources.ResourceManager.GetString("Enter", CultureInfo.CurrentCulture)} \"{Sources.CommandAgree}\" {Sources.ResourceManager.GetString("ToConfirm", CultureInfo.CurrentCulture)}.";
                         break;
                     case BotState.AskAdress:
-                        msg = $"Enter your adress, please.";
+                        msg = Sources.ResourceManager.GetString("EnterAdress", CultureInfo.CurrentCulture);
                         break;
                     default:
                         break;
@@ -516,10 +513,12 @@ namespace MiniBot.Activity
         }
         #endregion
 
+        #region Public methods
         public string GetBuffer()
         {
             return _buffer;
         }
+        #endregion
 
         #region Private methods
         private string ReadMessage()
@@ -558,12 +557,22 @@ namespace MiniBot.Activity
 
         private void CreateAccount()
         {
-            _account = new UserAccount() { Name = "Guest" };
+            _account = new UserAccount() { Name = Sources.ResourceManager.GetString("Guest", CultureInfo.CurrentCulture) };
 
-            if (State == BotState.AccountDecision)
+
+            SendMessage(DefaultString, BotState.AccName);
+
+            if (BackFromAccount(_buffer))
             {
+                SendMessage(DefaultString, BotState.AccountDecision);
+                return;
+            }
 
-                SendMessage(DefaultString, BotState.AccName);
+            _account.Name = Char.ToUpper(_buffer[0]) + _buffer.Substring(1);
+
+            while (true)
+            {
+                SendMessage(DefaultString, BotState.AccBirthDate);
 
                 if (BackFromAccount(_buffer))
                 {
@@ -571,85 +580,67 @@ namespace MiniBot.Activity
                     return;
                 }
 
-                _account.Name = Char.ToUpper(_buffer[0]) + _buffer.Substring(1);
-
-                SendMessage(DefaultString, BotState.AccBirthDate);
-
-                while (true)
+                string[] date = _buffer.Split('.');
+                if (date.ToList().Count != 3)
                 {
-                    if (BackFromAccount(_buffer))
-                    {
-                        SendMessage(DefaultString, BotState.AccountDecision);
-                        return;
-                    }
-
-                    string[] date = _buffer.Split('.');
-                    if (date.ToList().Count != 3)
-                    {
-                        SendMessage("Bad input format! Format is DD.MM.YYYY");
-                        continue;
-                    }
-
-                    int dd = 0, mm = 0, yy = 0;
-                    if (Int32.TryParse(date[0], out dd) && Int32.TryParse(date[1], out mm) && Int32.TryParse(date[2], out yy))
-                    {
-                        try
-                        {
-                            _account.BirthDate = new DateTime(yy, mm, dd);
-                        }
-                        catch (Exception ex)
-                        {
-                            SendMessage(ex.Message + " Try again.");
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        SendMessage("Format is DD.MM.YYYY");
-                        continue;
-                    }
-
-                    break;
+                    SendMessage(Sources.ResourceManager.GetString("Bad input format", CultureInfo.CurrentCulture) + " " + Sources.ResourceManager.GetString("DateFormat", CultureInfo.CurrentCulture));
+                    continue;
                 }
 
+                int dd = 0, mm = 0, yy = 0;
+                if (Int32.TryParse(date[0], out dd) && Int32.TryParse(date[1], out mm) && Int32.TryParse(date[2], out yy))
+                {
+                    try
+                    {
+                        _account.BirthDate = new DateTime(yy, mm, dd);
+                    }
+                    catch (Exception ex)
+                    {
+                        SendMessage(ex.Message + " " + Sources.ResourceManager.GetString("Try again", CultureInfo.CurrentCulture));
+                        continue;
+                    }
+                }
+                else
+                {
+                    SendMessage(Sources.ResourceManager.GetString("DateFormat", CultureInfo.CurrentCulture));
+                    continue;
+                }
+
+                break;
+            }
+
+            while (true)
+            {
                 SendMessage(DefaultString, BotState.AccLogin);
 
-                while (true)
+                if (BackFromAccount(_buffer))
                 {
-                    if (BackFromAccount(_buffer))
-                    {
-                        SendMessage(DefaultString, BotState.AccountDecision);
-                        return;
-                    }
-
-                    if (!CheckEmail(_buffer))
-                    {
-                        SendMessage("Incorrect email format!");
-                        continue;
-                    }
-
-                    _account.Login = _buffer;
-                    break;
+                    SendMessage(DefaultString, BotState.AccountDecision);
+                    return;
                 }
 
-                SendMessage(DefaultString, BotState.AccPassword);
+                if (!CheckEmail(_buffer))
+                {
+                    SendMessage(Sources.ResourceManager.GetString("Incorrect email format", CultureInfo.CurrentCulture));
+                    continue;
+                }
 
-                if (BackFromAccount(_buffer))
-                    SendMessage(DefaultString, BotState.AccountDecision);
-                _account.Password = _buffer;
-
-                SendMessage("Hooray! Now you have an account and you can buy something.", BotState.Write);
-                accountWorker.AddAccount(_account);
-
-                SubscribeAccount();
-
-                SendMessage(DefaultString, BotState.AskProduct);
+                _account.Login = _buffer;
+                break;
             }
-            else
-            {
-                SendMessage("So, may be next time. Good bye!");
-                ExitSystem();
-            }
+
+            SendMessage(DefaultString, BotState.AccPassword);
+
+            if (BackFromAccount(_buffer))
+                SendMessage(DefaultString, BotState.AccountDecision);
+            _account.Password = _buffer;
+
+            SendMessage(Sources.ResourceManager.GetString("AccountCreated", CultureInfo.CurrentCulture), BotState.Write);
+            accountWorker.AddAccount(_account);
+
+            SubscribeAccount();
+
+            SendMessage(DefaultString, BotState.AskProduct);
         }
 
         private bool CheckEmail(string input)
@@ -671,7 +662,7 @@ namespace MiniBot.Activity
         {
             if (_buffer.Length == 0)
             {
-                WriteLineMessage("Please, enter something!");
+                WriteLineMessage(Sources.ResourceManager.GetString("EnterSmt", CultureInfo.CurrentCulture));
                 WriteBotName(false);
                 return false;
             }
@@ -680,7 +671,7 @@ namespace MiniBot.Activity
 
             if (_buffer.Length > 1 && _buffer[0].Equals('-') && !_buffer[1].Equals('>') && !IsCommand(_buffer) || _buffer.Length == 1 && _buffer[0].Equals('-'))
             {
-                WriteLineMessage("I don't know this command :(");
+                WriteLineMessage(Sources.ResourceManager.GetString("UnknownCommand", CultureInfo.CurrentCulture));
                 WriteBotName(false);
                 return false;
             }
@@ -713,7 +704,7 @@ namespace MiniBot.Activity
 
         private void ExitSystem(int code = 0)
         {
-            Console.Write("\nFinishing");
+            Console.Write("\n" + Sources.ResourceManager.GetString("Finishing", CultureInfo.CurrentCulture));
 
             for (int i = 0; i < 3; i++)
             {
@@ -738,19 +729,19 @@ namespace MiniBot.Activity
 
         private static void OrderCompleted(string email, string message)
         {
-            Console.WriteLine("complited");
+            Console.WriteLine(Sources.ResourceManager.GetString("Order is completed", CultureInfo.CurrentCulture));
             //SendEmail(email, message);
         }
 
         private static void OrderDelivered(string email, string message)
         {
-            Console.WriteLine("delivered");
+            Console.WriteLine(Sources.ResourceManager.GetString("Order is delivered", CultureInfo.CurrentCulture));
             //SendEmail(email, message);
         }
 
         private static void OrderPaid(string email, string message)
         {
-            Console.WriteLine("paid");
+            Console.WriteLine(Sources.ResourceManager.GetString("Order is paid", CultureInfo.CurrentCulture));
             //SendEmail(email, message);
         }
 

@@ -131,7 +131,7 @@ namespace MiniBot.Activity
                 summary += _listOfItems[i].item.Cost * _listOfItems[i].amount;
             }
             Console.WriteLine($"{space}---------------");
-            Console.WriteLine($"{space}Total: {summary:$0.00}");
+            Console.WriteLine($"{space}{Sources.Total}: {summary:$0.00}");
         }
 
         public bool MoveNext()
