@@ -123,6 +123,9 @@
   <data name="AccountAlert" xml:space="preserve">
     <value>Well, to take an order you should have an account. Let's create it.</value>
   </data>
+  <data name="Adress" xml:space="preserve">
+    <value>Adress</value>
+  </data>
   <data name="Alcoholic" xml:space="preserve">
     <value>Alcoholic</value>
   </data>
@@ -225,6 +228,9 @@
   <data name="Incorrect email format" xml:space="preserve">
     <value>Incorrect email format!</value>
   </data>
+  <data name="IncorrectLogPas" xml:space="preserve">
+    <value>Incorrect email or password! Try again.</value>
+  </data>
   <data name="InfoAbout" xml:space="preserve">
     <value>Information about</value>
   </data>
@@ -302,6 +308,9 @@
   </data>
   <data name="Weight" xml:space="preserve">
     <value>Weight</value>
+  </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>Welcome</value>
   </data>
   <data name="WhatToOrder" xml:space="preserve">
     <value>What do you want to order?</value>

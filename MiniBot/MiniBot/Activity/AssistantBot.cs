@@ -36,12 +36,12 @@ namespace MiniBot.Activity
 
             public void SendCompleted()
             {
-                OrderCompleted?.Invoke(Login, Sources.ResourceManager.GetString("Order is completed", CultureInfo.CurrentCulture));
+                OrderCompleted?.Invoke(Login, Sources.ResourceManager.GetString("Order is completed", CultureInfo.CurrentCulture) + "\n" + GetProducts());
             }
 
-            public void SendDelivered()
+            public void SendDelivered(string adress)
             {
-                OrderDelivered?.Invoke(Login, Sources.ResourceManager.GetString("Order is delivered", CultureInfo.CurrentCulture));
+                OrderDelivered?.Invoke(Login, Sources.ResourceManager.GetString("Order is delivered", CultureInfo.CurrentCulture) + "\n" + Sources.ResourceManager.GetString("Adress", CultureInfo.CurrentCulture) + ": " + adress);
             }
 
             public void SendPaid()
@@ -61,6 +61,20 @@ namespace MiniBot.Activity
             {
                 return DateTime.Now.Year - this.BirthDate.Year > 18 || (DateTime.Now.Year - this.BirthDate.Year == 18 && DateTime.Now.Month >= this.BirthDate.Month);
             }
+
+            private string GetProducts()
+            {
+                string result = Sources.ResourceManager.GetString("Order", CultureInfo.CurrentCulture) + ":\n";
+
+                for (int i = 0; i < Basket.Count; i++)
+                {
+                    result += Basket.GetItemInfo(i) + "\n";
+                }
+                result += "\n";
+                result += Sources.ResourceManager.GetString("Total", CultureInfo.CurrentCulture) + $": {Basket.TotalPrice:$0.00}";
+
+                return result;
+            }
         }
 
         #region Fields
@@ -78,7 +92,7 @@ namespace MiniBot.Activity
 
         private Product _currentProduct;
         private Type _currentType;
-        private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=" + (new FileInfo(@"..\..\..\Resourcers\DBProducts.mdf")).FullName + ";Integrated Security=True");
+        private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=" + (new FileInfo(Environment.CurrentDirectory + @"\Resources\DBProducts.mdf").FullName) + ";Integrated Security=True");
         private UserAccount _account = new UserAccount() { Name = guestName };
         private AccountWorker<UserAccount> accountWorker = new AccountWorker<UserAccount>("Resources", "accounts.json");
         Logger _logger = new Logger();
@@ -171,18 +185,18 @@ namespace MiniBot.Activity
                                 if (accountWorker.FindAccount(array[0], array[1], ref _account))
                                 {
                                     SubscribeAccount();
-                                    SendMessage($"Welcome, {_account.Name}! " + DefaultString, BotState.AskProduct);
+                                    SendMessage($"{Sources.ResourceManager.GetString("Welcome", CultureInfo.CurrentCulture)}, {_account.Name}! " + DefaultString, BotState.AskProduct);
                                     break;
                                 }
                                 else
                                 {
-                                    WriteLineMessage($"Incorrect email or password! Try again.");
+                                    WriteLineMessage(Sources.ResourceManager.GetString("IncorrectLogPas", CultureInfo.CurrentCulture));
                                     command = ReadMessage();
                                 }
                             }
                             else
                             {
-                                WriteLineMessage($"Incorrect email format!");
+                                WriteLineMessage(Sources.ResourceManager.GetString("Incorrect email format", CultureInfo.CurrentCulture));
                                 command = ReadMessage();
                             }
                         }
@@ -331,7 +345,7 @@ namespace MiniBot.Activity
                         case CommandAgree:
                             _account.SendPaid();
                             _account.SendCompleted();
-                            _account.SendDelivered();
+                            _account.SendDelivered(_adress);
                             SendMessage(DefaultString, BotState.Sleep);
                             break;
                         case CommandBack:
@@ -346,6 +360,7 @@ namespace MiniBot.Activity
                     }
                     break;
                 case BotState.AskAdress:
+                    _adress = _buffer;
                     SendMessage(DefaultString, BotState.Confirm);
                     break;
                 default:
@@ -559,7 +574,6 @@ namespace MiniBot.Activity
         {
             _account = new UserAccount() { Name = Sources.ResourceManager.GetString("Guest", CultureInfo.CurrentCulture) };
 
-
             SendMessage(DefaultString, BotState.AccName);
 
             if (BackFromAccount(_buffer))
@@ -730,19 +744,19 @@ namespace MiniBot.Activity
         private static void OrderCompleted(string email, string message)
         {
             Console.WriteLine(Sources.ResourceManager.GetString("Order is completed", CultureInfo.CurrentCulture));
-            //SendEmail(email, message);
+            SendEmail(email, message);
         }
 
         private static void OrderDelivered(string email, string message)
         {
             Console.WriteLine(Sources.ResourceManager.GetString("Order is delivered", CultureInfo.CurrentCulture));
-            //SendEmail(email, message);
+            SendEmail(email, message);
         }
 
         private static void OrderPaid(string email, string message)
         {
             Console.WriteLine(Sources.ResourceManager.GetString("Order is paid", CultureInfo.CurrentCulture));
-            //SendEmail(email, message);
+            SendEmail(email, message);
         }
 
         private static void SendEmail(string email, string message)

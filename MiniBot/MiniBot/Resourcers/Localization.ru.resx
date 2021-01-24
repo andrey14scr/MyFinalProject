@@ -126,6 +126,9 @@
   <data name="AccountCreated" xml:space="preserve">
     <value>Ура! Теперь с аккаунтом вы можете что-нибудь купить.</value>
   </data>
+  <data name="Adress" xml:space="preserve">
+    <value>Адрес</value>
+  </data>
   <data name="Alcoholic" xml:space="preserve">
     <value>Акогольное</value>
   </data>
@@ -228,6 +231,9 @@
   <data name="Incorrect email format" xml:space="preserve">
     <value>Неправильный формат почтового адреса!</value>
   </data>
+  <data name="IncorrectLogPas" xml:space="preserve">
+    <value>Неправильный логин или пароль! попробуйте ещё раз.</value>
+  </data>
   <data name="InfoAbout" xml:space="preserve">
     <value>Информация продукта</value>
   </data>
@@ -308,6 +314,9 @@
   </data>
   <data name="Weight" xml:space="preserve">
     <value>Вес</value>
+  </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>Добро пожаловать</value>
   </data>
   <data name="WhatToOrder" xml:space="preserve">
     <value>Что вы хотите заказать?</value>
