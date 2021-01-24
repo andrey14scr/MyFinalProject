@@ -14,6 +14,7 @@ namespace MiniBot.Activity
     {
         private string _connectionString;
         private static int _nextId = 0;
+        private char _separator = '|';
 
         public DBWorker(string path)
         {
@@ -72,7 +73,7 @@ namespace MiniBot.Activity
                             foreach (var item in (product as Pizza).Ingredients)
                             {
                                 ingredients.Append(item);
-                                ingredients.Append("|");
+                                ingredients.Append(_separator);
                             }
                             ingredients = ingredients.Remove(ingredients.Length - 1, 1);
                             ParamFirst = new SqlParameter(fieldsArray[6], ingredients.ToString());
@@ -83,7 +84,7 @@ namespace MiniBot.Activity
                             foreach (var item in (product as Sushi).Ingredients)
                             {
                                 ingredients.Append(item);
-                                ingredients.Append("|");
+                                ingredients.Append(_separator);
                             }
                             ingredients = ingredients.Remove(ingredients.Length - 1, 1);
                             ParamFirst = new SqlParameter(fieldsArray[6], ingredients.ToString());
@@ -141,12 +142,12 @@ namespace MiniBot.Activity
                                     case PizzaTable:
                                         product = new Pizza((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                             (byte)reader["Score"], (string)reader["Description"],
-                                            ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (byte)reader["Size"]);
+                                            ((string)reader["Ingredients"]).Split(_separator), (short)reader["Weight"], (byte)reader["Size"]);
                                         break;
                                     case SushiTable:
                                         product = new Sushi((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                             (byte)reader["Score"], (string)reader["Description"],
-                                            ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (bool)reader["IsRaw"]);
+                                            ((string)reader["Ingredients"]).Split(_separator), (short)reader["Weight"], (bool)reader["IsRaw"]);
                                         break;
                                     case DrinkTable:
                                         product = new Drink((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
@@ -192,12 +193,12 @@ namespace MiniBot.Activity
                                 case PizzaTable:
                                     result = new Pizza((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                         (byte)reader["Score"], (string)reader["Description"],
-                                        ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (byte)reader["Size"]);
+                                        ((string)reader["Ingredients"]).Split(_separator), (short)reader["Weight"], (byte)reader["Size"]);
                                     break;
                                 case SushiTable:
                                     result = new Sushi((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
                                         (byte)reader["Score"], (string)reader["Description"],
-                                        ((string)reader["Ingredients"]).Split('|'), (short)reader["Weight"], (bool)reader["IsRaw"]);
+                                        ((string)reader["Ingredients"]).Split(_separator), (short)reader["Weight"], (bool)reader["IsRaw"]);
                                     break;
                                 case DrinkTable:
                                     result = new Drink((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],

@@ -235,8 +235,23 @@ namespace MiniBot.Activity
                             SendMessage(DefaultString, BotState.ShowBasket);
                             break;
                         default:
-                            WriteMessage("Information about ");
+                            string typeProduct = "";
                             _currentProduct = _dbWorker.GetById(_currentID);
+                            switch (_currentProduct)
+                            {
+                                case Pizza:
+                                    typeProduct = "pizza ";
+                                    break;
+                                case Sushi:
+                                    typeProduct = "sushi ";
+                                    break;
+                                case Drink:
+                                    typeProduct = "drink ";
+                                    break;
+                                default:
+                                    break;
+                            }
+                            WriteMessage("Information about " + typeProduct);
                             _currentProduct.ShowInfo(Indent);
                             SendMessage(DefaultString, BotState.ProductDecision);
                             break;
@@ -364,7 +379,6 @@ namespace MiniBot.Activity
             }
             else if (State == BotState.ShowMenu)
             {
-
                 ShowProductsChoices(_dbWorker.GetFromDB(x => x.GetType() == _currentType));
 
                 AddChoice(_delimiter);

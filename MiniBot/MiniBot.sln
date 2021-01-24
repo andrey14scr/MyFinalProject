@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30711.63
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MiniBot", "MiniBot\MiniBot.csproj", "{D2948015-4B8E-4282-B399-C9493D370034}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogInfo", "Logger\LogInfo.csproj", "{FC09DA20-41C0-4327-8D00-D8C62B8727B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogInfo", "Logger\LogInfo.csproj", "{FC09DA20-41C0-4327-8D00-D8C62B8727B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IngredientsFormat", "IngredientsFormat\IngredientsFormat.csproj", "{1195EE7F-A1AC-4C57-A87A-2855458E2E6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{FC09DA20-41C0-4327-8D00-D8C62B8727B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC09DA20-41C0-4327-8D00-D8C62B8727B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC09DA20-41C0-4327-8D00-D8C62B8727B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1195EE7F-A1AC-4C57-A87A-2855458E2E6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1195EE7F-A1AC-4C57-A87A-2855458E2E6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1195EE7F-A1AC-4C57-A87A-2855458E2E6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1195EE7F-A1AC-4C57-A87A-2855458E2E6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

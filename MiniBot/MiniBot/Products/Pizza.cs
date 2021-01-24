@@ -22,7 +22,7 @@ namespace MiniBot.Products
             StringBuilder sb = new StringBuilder();
             StringBuilderExtension.Space = space;
 
-            sb.SpaceAppend($"Cost: {Cost:$0.00}\n");
+            sb.SpaceAppend($"Cost: {Cost:$0.00}" + (Discount > 0 ? $" (Discount {Discount}%)\n" : "\n"));
             if (!String.IsNullOrEmpty(Description))
                 sb.SpaceAppend($"Description: {Description}\n");
             sb.SpaceAppend($"Composition: {GetComposition()}\n");

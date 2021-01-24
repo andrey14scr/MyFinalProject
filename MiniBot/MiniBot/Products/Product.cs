@@ -7,8 +7,16 @@ namespace MiniBot.Products
 {
     abstract class Product : IProduct, IShowInfo
     {
+        float _cost;
         public int Id { get; private set; }
-        public float Cost { get; private set; }
+        public float Cost 
+        {
+            get
+            {
+                return _cost * (1 - (float)Discount / 100);
+            }
+            private set => _cost = value;
+        }
         public string Name { get; private set; }
         public string Description { get; private set; }
         public byte Score { get; set; }
@@ -18,7 +26,7 @@ namespace MiniBot.Products
         {
             Id = id;
             Name = name;
-            Cost = cost;
+            _cost = cost;
             Score = score;
             Description = description;
         }
@@ -32,16 +40,16 @@ namespace MiniBot.Products
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             if (isSpacedName)
-                Console.WriteLine($"{space}{Name}:");
+                Console.WriteLine($"{space}{Name}");
             else
-                Console.WriteLine($"{Name}:");
+                Console.WriteLine($"{Name}");
             Console.ResetColor();
             Console.WriteLine(this.GetInfoWithoutName(space));
         }
 
         public void ShowShortInfo(string space = "")
         {
-            Console.WriteLine($"{space}{Name} {Cost:$0.00}");
+            Console.Write($"{space}{Name} {Cost:$0.00}");
         }
 
         public string GetShortInfo(string space = "")

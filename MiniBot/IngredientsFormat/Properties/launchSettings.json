@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "IngredientsFormat": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\andrey\\Desktop\\ingredients.txt\""
+    }
+  }
+}
