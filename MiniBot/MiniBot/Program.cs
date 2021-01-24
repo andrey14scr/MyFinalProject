@@ -7,6 +7,9 @@ using LogInfo;
 using System.Reflection;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Resources;
+using System.Globalization;
+using System.Threading;
 
 namespace MiniBot
 {
@@ -14,10 +17,12 @@ namespace MiniBot
     {
         static void Main(string[] args)
         {
+            CultureInfo ci = new CultureInfo("ru");
+            Thread.CurrentThread.CurrentCulture = ci; 
+
             AssistantBot bot = new AssistantBot();
-            Math.Abs(3);
-            Logger logger = new Logger();
-            logger.Mode = Mode.Console;
+            //Logger logger = new Logger();
+            //logger.Mode = Mode.Console;
 
             //bot.SendMessage("Hi", Sources.BotState.WriteAndWait);
             //bot.SendMessage("Login or register?", Sources.BotState.AccountDecision);

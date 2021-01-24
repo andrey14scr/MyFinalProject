@@ -141,19 +141,19 @@ namespace MiniBot.Activity
                     break;
                 case BotState.AccountDecision:
                     State = BotState.Write;
-                    switch (command)
+                    if (command.Equals(ChoiceRegister))
                     {
-                        case ChoiceRegister:
-                            State = BotState.AccountDecision;
-                            CreateAccount();
-                            break;
-                        case ChoiceLogin:
-                            State = BotState.FindAccount;
-                            SendMessage(DefaultString, BotState.FindAccount);
-                            break;
-                        default:
-                            SendMessage("Sorry, I don't understand you :(", BotState.AccountDecision);
-                            break;
+                        State = BotState.AccountDecision;
+                        CreateAccount();
+                    }
+                    else if (command == ChoiceLogin)
+                    {
+                        State = BotState.FindAccount;
+                        SendMessage(DefaultString, BotState.FindAccount);
+                    }
+                    else
+                    {
+                        SendMessage("Sorry, I don't understand you :(", BotState.AccountDecision);
                     }
                     break;
                 case BotState.FindAccount:
@@ -198,80 +198,81 @@ namespace MiniBot.Activity
                     }
                     break;
                 case BotState.AskProduct:
-                    switch (command)
+                    if (command.Equals(ChoicePizza))
                     {
-                        case ChoicePizza:
-                            _currentType = typeof(Pizza);
-                            SendMessage(DefaultString, BotState.ShowMenu);
-                            break;
-                        case ChoiceSushi:
-                            _currentType = typeof(Sushi);
-                            SendMessage(DefaultString, BotState.ShowMenu);
-                            break;
-                        case ChoiceDrink:
-                            _currentType = typeof(Drink);
-                            SendMessage(DefaultString, BotState.ShowMenu);
-                            break;
-                        case ChoiceSeeBasket:
-                            _backToMenu = false;
-                            SendMessage(DefaultString, BotState.ShowBasket);
-                            break;
-                        case ChoiceExit:
-                            _backToMenu = false;
-                            accountWorker.UpdateAccount(_account);
-                            _account.Exit();
-                            SendMessage(DefaultString, BotState.AccountDecision);
-                            break;
+                        _currentType = typeof(Pizza);
+                        SendMessage(DefaultString, BotState.ShowMenu);
+                    }
+                    else if (command.Equals(ChoiceSushi))
+                    {
+                        _currentType = typeof(Sushi);
+                        SendMessage(DefaultString, BotState.ShowMenu);
+                    }
+                    else if (command.Equals(ChoiceDrink))
+                    {
+                        _currentType = typeof(Drink);
+                        SendMessage(DefaultString, BotState.ShowMenu);
+                    }
+                    else if (command.Equals(ChoiceSeeBasket))
+                    {
+                        _backToMenu = false;
+                        SendMessage(DefaultString, BotState.ShowBasket);
+                    }
+                    else if (command.Equals(ChoiceExit))
+                    {
+                        _backToMenu = false;
+                        accountWorker.UpdateAccount(_account);
+                        _account.Exit();
+                        SendMessage(DefaultString, BotState.AccountDecision);
                     }
                     break;
                 case BotState.ShowProduct:
-                    switch (command)
+                    if (command.Equals(ChoiceBack))
                     {
-                        case ChoiceBack:
-                            SendMessage(DefaultString, BotState.AskProduct);
-                            break;
-                        case ChoiceSeeBasket:
-                            _backToMenu = true;
-                            SendMessage(DefaultString, BotState.ShowBasket);
-                            break;
-                        default:
-                            string typeProduct = "";
-                            _currentProduct = _dbWorker.GetById(_currentID);
-                            switch (_currentProduct)
-                            {
-                                case Pizza:
-                                    typeProduct = "pizza ";
-                                    break;
-                                case Sushi:
-                                    typeProduct = "sushi ";
-                                    break;
-                                case Drink:
-                                    typeProduct = "drink ";
-                                    break;
-                                default:
-                                    break;
-                            }
-                            WriteMessage("Information about " + typeProduct);
-                            _currentProduct.ShowInfo(Indent);
-                            SendMessage(DefaultString, BotState.ProductDecision);
-                            break;
+                        SendMessage(DefaultString, BotState.AskProduct);
+                    }
+                    else if (command.Equals(ChoiceSeeBasket))
+                    {
+                        _backToMenu = true;
+                        SendMessage(DefaultString, BotState.ShowBasket);
+                    }
+                    else
+                    {
+                        string typeProduct = "";
+                        _currentProduct = _dbWorker.GetById(_currentID);
+                        switch (_currentProduct)
+                        {
+                            case Pizza:
+                                typeProduct = "pizza ";
+                                break;
+                            case Sushi:
+                                typeProduct = "sushi ";
+                                break;
+                            case Drink:
+                                typeProduct = "drink ";
+                                break;
+                            default:
+                                break;
+                        }
+                        WriteMessage("Information about " + typeProduct);
+                        _currentProduct.ShowInfo(Indent);
+                        SendMessage(DefaultString, BotState.ProductDecision);
                     }
                     break;
                 case BotState.ProductDecision:
-                    switch (command)
+                    if (command.Equals(ChoiceBack))
                     {
-                        case ChoiceBack:
+                        SendMessage(DefaultString, BotState.ShowMenu);
+                    }
+                    else if (command.Equals(ChoiceTake))
+                    {
+                        if (_currentProduct is Drink && (_currentProduct as Drink).IsAlcohol && !_account.IsAdult())
+                        {
+                            SendMessage("You can't buy alcohol drinks!", BotState.Write);
                             SendMessage(DefaultString, BotState.ShowMenu);
-                            break;
-                        case ChoiceTake:
-                            if (_currentProduct is Drink && (_currentProduct as Drink).IsAlcohol && !_account.IsAdult())
-                            {
-                                SendMessage("You can't buy alcohol drinks!", BotState.Write);
-                                SendMessage(DefaultString, BotState.ShowMenu);
-                            }
-                            else
-                                SendMessage(DefaultString, BotState.AskAmount);
-                            break;
+                        }
+                        else
+                            SendMessage(DefaultString, BotState.AskAmount);
                     }
                     break;
                 case BotState.AskAmount:
@@ -285,45 +286,46 @@ namespace MiniBot.Activity
                     SendMessage(DefaultString, BotState.ShowMenu);
                     break;
                 case BotState.ShowBasket:
-                    switch (command)
+                    if (command.Equals(ChoiceBack))
                     {
-                        case ChoiceBack:
-                            if (_backToMenu)
-                                SendMessage(DefaultString, BotState.ShowMenu);
-                            else
-                                SendMessage(DefaultString, BotState.AskProduct);
-                            break;
-                        case ChoiceBuy:
-                            SendMessage(DefaultString, BotState.AskAdress);
-                            break;
-                        default:
-                            WriteMessage("Information about ");
+                        if (_backToMenu)
+                            SendMessage(DefaultString, BotState.ShowMenu);
+                        else
+                            SendMessage(DefaultString, BotState.AskProduct);
+                    }
+                    else if (command.Equals(ChoiceBuy))
+                    {
+                        SendMessage(DefaultString, BotState.AskAdress);
+                    }
+                    else
+                    {
+                        WriteMessage("Information about ");
 
-                            _currentProduct = _dbWorker.GetById(_currentID);
-                            _currentProduct.ShowInfo(Indent);
+                        _currentProduct = _dbWorker.GetById(_currentID);
+                        _currentProduct.ShowInfo(Indent);
 
-                            SendMessage(DefaultString, BotState.ProductInBusket);
-                            break;
+                        SendMessage(DefaultString, BotState.ProductInBusket);
                     }
                     break;
                 case BotState.ProductInBusket:
-                    switch (command)
+                    if (command.Equals(ChoiceRemove))
                     {
-                        case ChoiceRemove:
-                            _account.Basket.RemoveById(_currentID);
-                            SendMessage(DefaultString, BotState.ShowBasket);
-                            break;
-                        case ChoiceReduce:
-                            _account.Basket.Remove(_currentProduct, _currentID);
-                            SendMessage(DefaultString, BotState.ProductInBusket);
-                            break;
-                        case ChoiceEnlarge:
-                            _account.Basket.Add(_currentProduct, _currentID);
-                            SendMessage(DefaultString, BotState.ProductInBusket);
-                            break;
-                        case ChoiceBack:
-                            SendMessage(DefaultString, BotState.ShowBasket);
-                            break;
+                        _account.Basket.RemoveById(_currentID);
+                        SendMessage(DefaultString, BotState.ShowBasket);
+                    }
+                    else if (command.Equals(ChoiceReduce))
+                    {
+                        _account.Basket.Remove(_currentProduct, _currentID);
+                        SendMessage(DefaultString, BotState.ProductInBusket);
+                    }
+                    else if (command.Equals(ChoiceEnlarge))
+                    {
+                        _account.Basket.Add(_currentProduct, _currentID);
+                        SendMessage(DefaultString, BotState.ProductInBusket);
+                    }
+                    else if (command.Equals(ChoiceBack))
+                    {
+                        SendMessage(DefaultString, BotState.ShowBasket);
                     }
                     break;
                 case BotState.Confirm:

@@ -26,13 +26,13 @@ namespace MiniBot.Products
             StringBuilder sb = new StringBuilder();
             StringBuilderExtension.Space = space;
 
-            sb.SpaceAppend($"Cost: {Cost:$0.00}" + (Discount > 0 ? $" (Discount {Discount}%)\n" : "\n"));
+            sb.SpaceAppend($"{Sources.Cost}: {Cost:$0.00}" + (Discount > 0 ? $" ({Sources.Discount} {Discount}%)\n" : "\n"));
             if (!String.IsNullOrEmpty(Description))
-                sb.SpaceAppend($"Description: {Description}\n");
-            sb.SpaceAppend($"Volume: {Volume} g\n");
-            sb.SpaceAppend(HasGase ? "With gase\n" : "Without gase\n");
-            sb.SpaceAppend(IsAlcohol ? "Alcoholic\n" : "Not alcoholic\n");
-            sb.SpaceAppend($"Score: {(float)Score / 2}*");
+                sb.SpaceAppend($"{Sources.Description}: {Description}\n");
+            sb.SpaceAppend($"{Sources.Volume}: {Volume} {Sources.g}\n");
+            sb.SpaceAppend(HasGase ? $"{Sources.WithGase}\n" : $"{Sources.WithoutGase}\n");
+            sb.SpaceAppend(IsAlcohol ? $"{Sources.Alcoholic}\n" : $"{Sources.NotAlcoholic}\n");
+            sb.SpaceAppend($"{Sources.Score}: {(float)Score / 2}*");
 
             return sb.ToString();
         }
