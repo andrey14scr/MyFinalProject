@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <ApplicationIcon>chat_icon_129138.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

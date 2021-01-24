@@ -14,7 +14,7 @@ namespace MiniBot.Activity
         public static ResourceManager ResourceManager;
         static Sources()
         {
-            ResourceManager = new ResourceManager("MiniBot.Resourcers.Localization", Assembly.GetExecutingAssembly());
+            ResourceManager = new ResourceManager("MiniBot.Resources.Localization", Assembly.GetExecutingAssembly());
 
             ChoiceLogin = "->" + ResourceManager.GetString("login", CultureInfo.CurrentCulture);
             ChoiceRegister = "->" + ResourceManager.GetString("register", CultureInfo.CurrentCulture);
