@@ -1,4 +1,5 @@
-﻿using MiniBot.Exceptions;
+﻿using LogInfo;
+using MiniBot.Exceptions;
 using MiniBot.Interfaces;
 using MiniBot.Products;
 using System;
@@ -20,6 +21,9 @@ namespace MiniBot.Activity
         public DBWorker(string path)
         {
             _connectionString = path;
+
+            if (!Logger.IsInited)
+                Logger.Init();
         }
 
         public void AddToDB(Product product)
@@ -42,75 +46,84 @@ namespace MiniBot.Activity
                 default:
                     break;
             }
-            
+
             string sqlExpression = $"INSERT INTO {table} ({fields.Replace("@", "")}) VALUES ({fields})";
             fields = fields.Replace(",", "");
             string[] fieldsArray = fields.Split(' ');
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                connection.Open();
-                using (SqlCommand command = new SqlCommand(sqlExpression, connection))
+                try
                 {
-                    SqlParameter ParamId = new SqlParameter(fieldsArray[0], _nextId++);
-                    command.Parameters.Add(ParamId);
-                    SqlParameter ParamCost = new SqlParameter(fieldsArray[1], product.Cost);
-                    command.Parameters.Add(ParamCost);
-                    SqlParameter ParamName = new SqlParameter(fieldsArray[2], product.Name);
-                    command.Parameters.Add(ParamName);
-                    SqlParameter ParamDescription = new SqlParameter(fieldsArray[3], product.Description);
-                    command.Parameters.Add(ParamDescription);
-                    SqlParameter ParamScore = new SqlParameter(fieldsArray[4], product.Score);
-                    command.Parameters.Add(ParamScore);
-                    SqlParameter ParamDiscount = new SqlParameter(fieldsArray[5], product.Discount);
-                    command.Parameters.Add(ParamDiscount);
+                    connection.Open();
 
-                    SqlParameter ParamFirst = null, ParamSecond = null, ParamThird = null;
-                    StringBuilder ingredients = new StringBuilder();
-                    
-                    switch (product)
+                    using (SqlCommand command = new SqlCommand(sqlExpression, connection))
                     {
-                        case Pizza:
-                            foreach (var item in (product as Pizza).Ingredients)
-                            {
-                                ingredients.Append(item);
-                                ingredients.Append(_separator);
-                            }
-                            ingredients = ingredients.Remove(ingredients.Length - 1, 1);
-                            ParamFirst = new SqlParameter(fieldsArray[6], ingredients.ToString());
-                            ParamSecond = new SqlParameter(fieldsArray[7], (product as Pizza).Weight);
-                            ParamThird = new SqlParameter(fieldsArray[8], (product as Pizza).Size);
-                            break;
-                        case Sushi:
-                            foreach (var item in (product as Sushi).Ingredients)
-                            {
-                                ingredients.Append(item);
-                                ingredients.Append(_separator);
-                            }
-                            ingredients = ingredients.Remove(ingredients.Length - 1, 1);
-                            ParamFirst = new SqlParameter(fieldsArray[6], ingredients.ToString());
-                            ParamSecond = new SqlParameter(fieldsArray[7], (product as Sushi).Weight);
-                            ParamThird = new SqlParameter(fieldsArray[8], (product as Sushi).IsRaw);
-                            break;
-                        case Drink:
-                            ParamFirst = new SqlParameter(fieldsArray[6], (product as Drink).Volume);
-                            ParamSecond = new SqlParameter(fieldsArray[7], (product as Drink).HasGase);
-                            ParamThird = new SqlParameter(fieldsArray[8], (product as Drink).IsAlcohol);
-                            break;
-                        default:
-                            break;
+                        SqlParameter ParamId = new SqlParameter(fieldsArray[0], _nextId++);
+                        command.Parameters.Add(ParamId);
+                        SqlParameter ParamCost = new SqlParameter(fieldsArray[1], product.Cost);
+                        command.Parameters.Add(ParamCost);
+                        SqlParameter ParamName = new SqlParameter(fieldsArray[2], product.Name);
+                        command.Parameters.Add(ParamName);
+                        SqlParameter ParamDescription = new SqlParameter(fieldsArray[3], product.Description);
+                        command.Parameters.Add(ParamDescription);
+                        SqlParameter ParamScore = new SqlParameter(fieldsArray[4], product.Score);
+                        command.Parameters.Add(ParamScore);
+                        SqlParameter ParamDiscount = new SqlParameter(fieldsArray[5], product.Discount);
+                        command.Parameters.Add(ParamDiscount);
+
+                        SqlParameter ParamFirst = null, ParamSecond = null, ParamThird = null;
+                        StringBuilder ingredients = new StringBuilder();
+
+                        switch (product)
+                        {
+                            case Pizza:
+                                foreach (var item in (product as Pizza).Ingredients)
+                                {
+                                    ingredients.Append(item);
+                                    ingredients.Append(_separator);
+                                }
+                                ingredients = ingredients.Remove(ingredients.Length - 1, 1);
+                                ParamFirst = new SqlParameter(fieldsArray[6], ingredients.ToString());
+                                ParamSecond = new SqlParameter(fieldsArray[7], (product as Pizza).Weight);
+                                ParamThird = new SqlParameter(fieldsArray[8], (product as Pizza).Size);
+                                break;
+                            case Sushi:
+                                foreach (var item in (product as Sushi).Ingredients)
+                                {
+                                    ingredients.Append(item);
+                                    ingredients.Append(_separator);
+                                }
+                                ingredients = ingredients.Remove(ingredients.Length - 1, 1);
+                                ParamFirst = new SqlParameter(fieldsArray[6], ingredients.ToString());
+                                ParamSecond = new SqlParameter(fieldsArray[7], (product as Sushi).Weight);
+                                ParamThird = new SqlParameter(fieldsArray[8], (product as Sushi).IsRaw);
+                                break;
+                            case Drink:
+                                ParamFirst = new SqlParameter(fieldsArray[6], (product as Drink).Volume);
+                                ParamSecond = new SqlParameter(fieldsArray[7], (product as Drink).HasGase);
+                                ParamThird = new SqlParameter(fieldsArray[8], (product as Drink).IsAlcohol);
+                                break;
+                            default:
+                                break;
+                        }
+
+                        if (ParamFirst == null || ParamSecond == null || ParamThird == null)
+                        {
+                            throw new NullReferenceException("Null additional values");
+                        }
+
+                        command.Parameters.Add(ParamFirst);
+                        command.Parameters.Add(ParamSecond);
+                        command.Parameters.Add(ParamThird);
+
+                        command.ExecuteNonQuery();
                     }
-
-                    if (ParamFirst == null || ParamSecond == null || ParamThird == null) 
-                    {
-                        throw new DBWorkerException("Null additional values");
-                    }
-
-                    command.Parameters.Add(ParamFirst);
-                    command.Parameters.Add(ParamSecond);
-                    command.Parameters.Add(ParamThird);
-
-                    command.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex.Message);
+                    return;
                 }
             }
         }
@@ -122,57 +135,65 @@ namespace MiniBot.Activity
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                connection.Open();
-
-                string sqlExpression;
-
-                foreach (var table in ProductTables)
+                try
                 {
-                    sqlExpression = $"SELECT * FROM {table}";
+                    connection.Open();
 
-                    using (SqlCommand command = new SqlCommand(sqlExpression, connection))
+                    string sqlExpression;
+
+                    foreach (var table in ProductTables)
                     {
-                        SqlDataReader reader = command.ExecuteReader();
+                        sqlExpression = $"SELECT * FROM {table}";
 
-                        if (reader.HasRows)
+                        using (SqlCommand command = new SqlCommand(sqlExpression, connection))
                         {
-                            while (reader.Read())
+                            SqlDataReader reader = command.ExecuteReader();
+
+                            if (reader.HasRows)
                             {
-                                switch (table)
+                                while (reader.Read())
                                 {
-                                    case PizzaTable:
-                                        product = new Pizza((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
-                                            (byte)reader["Score"], (string)reader["Description"],
-                                            ((string)reader["Ingredients"]).Split(_separator), (short)reader["Weight"], (byte)reader["Size"]);
-                                        break;
-                                    case SushiTable:
-                                        product = new Sushi((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
-                                            (byte)reader["Score"], (string)reader["Description"],
-                                            ((string)reader["Ingredients"]).Split(_separator), (short)reader["Weight"], (bool)reader["IsRaw"]);
-                                        break;
-                                    case DrinkTable:
-                                        product = new Drink((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
-                                            (byte)reader["Score"], (string)reader["Description"],
-                                            (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
-                                        break;
-                                }
+                                    switch (table)
+                                    {
+                                        case PizzaTable:
+                                            product = new Pizza((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                                (byte)reader["Score"], (string)reader["Description"],
+                                                ((string)reader["Ingredients"]).Split(_separator), (short)reader["Weight"], (byte)reader["Size"]);
+                                            break;
+                                        case SushiTable:
+                                            product = new Sushi((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                                (byte)reader["Score"], (string)reader["Description"],
+                                                ((string)reader["Ingredients"]).Split(_separator), (short)reader["Weight"], (bool)reader["IsRaw"]);
+                                            break;
+                                        case DrinkTable:
+                                            product = new Drink((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                                (byte)reader["Score"], (string)reader["Description"],
+                                                (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
+                                            break;
+                                    }
 
-                                if (product == null)
-                                {
-                                    throw new DBWorkerException("Null product");
-                                }
+                                    if (product == null)
+                                    {
+                                        throw new NullReferenceException("Null product");
+                                    }
 
-                                product.Discount = (byte)reader["Discount"];
+                                    product.Discount = (byte)reader["Discount"];
 
-                                if (predicate(product))
-                                {
-                                    answerList.Add(product);
+                                    if (predicate(product))
+                                    {
+                                        answerList.Add(product);
+                                    }
                                 }
                             }
-                        }
 
-                        reader.Close();
+                            reader.Close();
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex.Message);
+                    return answerList;
                 }
             }
 
@@ -185,54 +206,79 @@ namespace MiniBot.Activity
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                connection.Open();
-
-                foreach (var table in ProductTables)
+                try
                 {
-                    string sqlExpression = $"SELECT * FROM {table} WHERE Id={id}";
-                    using (SqlCommand command = new SqlCommand(sqlExpression, connection))
+                    connection.Open();
+
+                    foreach (var table in ProductTables)
                     {
-                        SqlDataReader reader = command.ExecuteReader();
-                        if (reader.HasRows && reader.Read())
+                        string sqlExpression = $"SELECT * FROM {table} WHERE Id={id}";
+                        using (SqlCommand command = new SqlCommand(sqlExpression, connection))
                         {
-                            switch (table)
+                            SqlDataReader reader = command.ExecuteReader();
+                            if (reader.HasRows && reader.Read())
                             {
-                                case PizzaTable:
-                                    result = new Pizza((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
-                                        (byte)reader["Score"], (string)reader["Description"],
-                                        ((string)reader["Ingredients"]).Split(_separator), (short)reader["Weight"], (byte)reader["Size"]);
-                                    break;
-                                case SushiTable:
-                                    result = new Sushi((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
-                                        (byte)reader["Score"], (string)reader["Description"],
-                                        ((string)reader["Ingredients"]).Split(_separator), (short)reader["Weight"], (bool)reader["IsRaw"]);
-                                    break;
-                                case DrinkTable:
-                                    result = new Drink((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
-                                        (byte)reader["Score"], (string)reader["Description"],
-                                        (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
-                                    break;
+                                switch (table)
+                                {
+                                    case PizzaTable:
+                                        result = new Pizza((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                            (byte)reader["Score"], (string)reader["Description"],
+                                            ((string)reader["Ingredients"]).Split(_separator), (short)reader["Weight"], (byte)reader["Size"]);
+                                        break;
+                                    case SushiTable:
+                                        result = new Sushi((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                            (byte)reader["Score"], (string)reader["Description"],
+                                            ((string)reader["Ingredients"]).Split(_separator), (short)reader["Weight"], (bool)reader["IsRaw"]);
+                                        break;
+                                    case DrinkTable:
+                                        result = new Drink((int)reader["Id"], (string)reader["Name"], (float)reader["Cost"],
+                                            (byte)reader["Score"], (string)reader["Description"],
+                                            (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
+                                        break;
+                                }
+
+                                if (result == null)
+                                {
+                                    throw new NullReferenceException("Not found object");
+                                }
+
+                                result.Discount = (byte)reader["Discount"];
                             }
 
-                            if (result == null)
-                            {
-                                throw new DBWorkerException("Not found object");
-                            }
-
-                            result.Discount = (byte)reader["Discount"];
+                            reader.Close();
                         }
-
-                        reader.Close();
                     }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex.Message);
+                    return result;
                 }
             }
 
             return result;
         }
 
-        public void RemoveFromDB(Func<Product, bool> predicate)
+        public void RemoveFromDB(int id)
         {
-            throw new NotImplementedException();
+            string sqlExpression = "DELETE FROM TableOfNotes WHERE Id=" + id.ToString();
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    using (SqlCommand command = new SqlCommand(sqlExpression, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex.Message);
+                    return;
+                }
+            }
         }
     }
 }

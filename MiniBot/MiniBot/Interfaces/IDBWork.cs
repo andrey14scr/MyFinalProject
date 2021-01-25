@@ -14,6 +14,6 @@ namespace MiniBot.Interfaces
 
         IEnumerable<Product> GetFromDB(Func<Product, bool> predicate);
 
-        void RemoveFromDB(Func<Product, bool> predicate);
+        void RemoveFromDB(int id);
     }
 }

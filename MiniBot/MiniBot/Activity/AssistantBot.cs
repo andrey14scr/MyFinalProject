@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using static MiniBot.Activity.Sources;
 using MiniBot.Products;
@@ -875,7 +874,6 @@ namespace MiniBot.Activity
             catch (Exception ex)
             {
                 Logger.Error(ex.Message);
-                Console.WriteLine("Something was wrong. More: " + ex.Message);
             }
         }
         #endregion
