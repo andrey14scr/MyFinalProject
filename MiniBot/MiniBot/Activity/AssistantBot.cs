@@ -46,7 +46,7 @@ namespace MiniBot.Activity
 
             public void SendPaid()
             {
-                OrderPaid?.Invoke(Login, GetLocal("Order is paid"));
+                OrderPaid?.Invoke(Login, GetLocal("Order is paid") + "\n" + GetProducts());
             }
 
             public void Exit()

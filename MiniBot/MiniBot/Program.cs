@@ -18,6 +18,8 @@ namespace MiniBot
         static void Main(string[] args)
         {
             AssistantBot bot = new AssistantBot();
+            Console.WindowWidth = 140;
+            Console.WindowHeight = 40;
             //Logger logger = new Logger();
             //logger.Mode = Mode.Console;
 
