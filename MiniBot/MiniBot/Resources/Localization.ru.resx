@@ -144,6 +144,9 @@
   <data name="Can'tBuyAlco" xml:space="preserve">
     <value>Вам нельзя купить алкоголь!</value>
   </data>
+  <data name="Choose language" xml:space="preserve">
+    <value>Выберите язык</value>
+  </data>
   <data name="cm" xml:space="preserve">
     <value>см</value>
   </data>
@@ -167,6 +170,9 @@
   </data>
   <data name="Empty" xml:space="preserve">
     <value>&lt;Пусто&gt;</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>Английский</value>
   </data>
   <data name="enlarge" xml:space="preserve">
     <value>больше</value>
@@ -272,6 +278,9 @@
   </data>
   <data name="remove" xml:space="preserve">
     <value>убрать</value>
+  </data>
+  <data name="Russian" xml:space="preserve">
+    <value>Русский</value>
   </data>
   <data name="Score" xml:space="preserve">
     <value>Рейтинг</value>

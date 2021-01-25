@@ -17,9 +17,6 @@ namespace MiniBot
     {
         static void Main(string[] args)
         {
-            CultureInfo ci = new CultureInfo("ru");
-            Thread.CurrentThread.CurrentCulture = ci; 
-
             AssistantBot bot = new AssistantBot();
             //Logger logger = new Logger();
             //logger.Mode = Mode.Console;
@@ -29,7 +26,7 @@ namespace MiniBot
             //bot.DoAction(bot.GetBuffer());
             //bot.SendMessage(null, Sources.BotState.FindAccount);
             //bot.DoAction(bot.GetBuffer());
-           
+
 
 
             //string s = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
@@ -53,6 +50,10 @@ namespace MiniBot
             bas.ShowSummary();
             */
             //p.ShowShortInfo();
+
+
+
+            bot.SetLanguage();
 
             bot.Start();
         }

@@ -16,42 +16,42 @@ namespace MiniBot.Activity
         {
             ResourceManager = new ResourceManager("MiniBot.Resources.Localization", Assembly.GetExecutingAssembly());
 
-            ChoiceLogin = "->" + ResourceManager.GetString("login", CultureInfo.CurrentCulture);
-            ChoiceRegister = "->" + ResourceManager.GetString("register", CultureInfo.CurrentCulture);
-            ChoicePizza = "->" + ResourceManager.GetString("pizza", CultureInfo.CurrentCulture);
-            ChoiceSushi = "->" + ResourceManager.GetString("sushi", CultureInfo.CurrentCulture);
-            ChoiceDrink = "->" + ResourceManager.GetString("drink", CultureInfo.CurrentCulture);
-            ChoiceBack = "->" + ResourceManager.GetString("back", CultureInfo.CurrentCulture);
-            ChoiceTake = "->" + ResourceManager.GetString("take", CultureInfo.CurrentCulture);
-            ChoiceSeeBasket = "->" + ResourceManager.GetString("see basket", CultureInfo.CurrentCulture);
-            ChoiceBuy = "->" + ResourceManager.GetString("buy", CultureInfo.CurrentCulture);
-            ChoiceRemove = "->" + ResourceManager.GetString("remove", CultureInfo.CurrentCulture);
-            ChoiceReduce = "->" + ResourceManager.GetString("reduce", CultureInfo.CurrentCulture);
-            ChoiceEnlarge = "->" + ResourceManager.GetString("enlarge", CultureInfo.CurrentCulture);
-            ChoiceExit = "->" + ResourceManager.GetString("exit", CultureInfo.CurrentCulture);
+            ChoiceLogin = "->" + GetLocal("login");
+            ChoiceRegister = "->" + GetLocal("register");
+            ChoicePizza = "->" + GetLocal("pizza");
+            ChoiceSushi = "->" + GetLocal("sushi");
+            ChoiceDrink = "->" + GetLocal("drink");
+            ChoiceBack = "->" + GetLocal("back");
+            ChoiceTake = "->" + GetLocal("take");
+            ChoiceSeeBasket = "->" + GetLocal("see basket");
+            ChoiceBuy = "->" + GetLocal("buy");
+            ChoiceRemove = "->" + GetLocal("remove");
+            ChoiceReduce = "->" + GetLocal("reduce");
+            ChoiceEnlarge = "->" + GetLocal("enlarge");
+            ChoiceExit = "->" + GetLocal("exit");
 
-            mailTitle = ResourceManager.GetString("Order", CultureInfo.CurrentCulture);
+            mailTitle = GetLocal("Order");
 
-            guestName = ResourceManager.GetString("Guest", CultureInfo.CurrentCulture);
+            guestName = GetLocal("Guest");
 
-            Cost = ResourceManager.GetString("Cost", CultureInfo.CurrentCulture);
-            Discount = ResourceManager.GetString("Discount", CultureInfo.CurrentCulture);
-            Description = ResourceManager.GetString("Description", CultureInfo.CurrentCulture); 
-            Volume = ResourceManager.GetString("Volume", CultureInfo.CurrentCulture);
-            g = ResourceManager.GetString("g", CultureInfo.CurrentCulture);
-            WithGase = ResourceManager.GetString("With gase", CultureInfo.CurrentCulture);
-            WithoutGase = ResourceManager.GetString("Without gase", CultureInfo.CurrentCulture);
-            Alcoholic = ResourceManager.GetString("Alcoholic", CultureInfo.CurrentCulture);
-            NotAlcoholic = ResourceManager.GetString("Not alcoholic", CultureInfo.CurrentCulture);
-            Score = ResourceManager.GetString("Score", CultureInfo.CurrentCulture);
-            Composition = ResourceManager.GetString("Composition", CultureInfo.CurrentCulture);
-            Weight = ResourceManager.GetString("Weight", CultureInfo.CurrentCulture);
-            Raw = ResourceManager.GetString("Raw", CultureInfo.CurrentCulture);
-            Fried = ResourceManager.GetString("Fried", CultureInfo.CurrentCulture);
-            Size = ResourceManager.GetString("Size", CultureInfo.CurrentCulture);
-            sm = ResourceManager.GetString("sm", CultureInfo.CurrentCulture);
+            Cost = GetLocal("Cost");
+            Discount = GetLocal("Discount");
+            Description = GetLocal("Description"); 
+            Volume = GetLocal("Volume");
+            g = GetLocal("g");
+            WithGase = GetLocal("With gase");
+            WithoutGase = GetLocal("Without gase");
+            Alcoholic = GetLocal("Alcoholic");
+            NotAlcoholic = GetLocal("Not alcoholic");
+            Score = GetLocal("Score");
+            Composition = GetLocal("Composition");
+            Weight = GetLocal("Weight");
+            Raw = GetLocal("Raw");
+            Fried = GetLocal("Fried");
+            Size = GetLocal("Size");
+            sm = GetLocal("sm");
 
-            Total = ResourceManager.GetString("Total", CultureInfo.CurrentCulture);
+            Total = GetLocal("Total");
         }
 
         public enum BotState : byte
@@ -111,6 +111,9 @@ namespace MiniBot.Activity
         public const string SushiTable = "SushiTable";
         public const string DrinkTable = "DrinkTable";
 
+        public const string EN = "en";
+        public const string RU = "ru";
+
         public static string[] ProductTables = new string[] { PizzaTable, SushiTable, DrinkTable };
 
         public static readonly string Cost;
@@ -142,6 +145,11 @@ namespace MiniBot.Activity
                 return true;
             }
             return false;
+        }
+
+        public static string GetLocal(string name)
+        {
+            return ResourceManager.GetString(name, CultureInfo.CurrentCulture);
         }
     }
 }
