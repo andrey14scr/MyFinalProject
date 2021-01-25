@@ -15,9 +15,9 @@ namespace LogInfo
     }
 
     [DebugMode]
-    public class Logger
+    public static class Logger
     {
-        private int _counter = 0;
+        private static int _counter = 0;
 
         private const string DBG = "DBG";
         private const string INF = "INF";
@@ -28,11 +28,13 @@ namespace LogInfo
 
         private const long maxFileSize = 30 * 1024;
 
-        public Mode Mode { get; set; }
-        private bool _isDebug;
-        private bool _isInited = false;
+        public static Mode Mode { get; set; }
+        private static bool _isDebug;
+        private static bool _isInited = false;
 
-        public Logger(Mode mode = Mode.File)
+        public static bool IsInited { get => _isInited; }
+
+        public static void Init(Mode mode = Mode.File)
         {
             Mode = mode;
 
@@ -54,7 +56,7 @@ namespace LogInfo
             _isInited = true;
         }
 
-        public void Info(string message, object obj = null)
+        public static void Info(string message, object obj = null)
         {
             if (!_isInited)
                 throw new LogException("a");
@@ -62,7 +64,7 @@ namespace LogInfo
             Log(INF, message, obj);
         }
 
-        public void Debug(string message, object obj = null)
+        public static void Debug(string message, object obj = null)
         {
             if (!_isInited)
                 throw new LogException("a");
@@ -71,7 +73,7 @@ namespace LogInfo
                 Log(DBG, message, obj);
         }
 
-        public void Error(string message, object obj = null)
+        public static void Error(string message, object obj = null)
         {
             if (!_isInited)
                 throw new LogException("a");
@@ -79,7 +81,7 @@ namespace LogInfo
             Log(ERR, message, obj);
         }
 
-        private void Log(string mode, string message, object obj)
+        private static void Log(string mode, string message, object obj)
         {
             StackTrace stackTrace = new StackTrace();
 
@@ -176,13 +178,13 @@ namespace LogInfo
             }
         }
 
-        private string CreateFileName()
+        private static string CreateFileName()
         {
             DateTime nowTime = DateTime.Now;
             return folderName + "\\log_" + nowTime.Year + nowTime.Month + nowTime.Day + "_[" + _counter.ToString("0000") + "].txt";
         }
 
-        private void WriteInFile(string path, string content)
+        private static void WriteInFile(string path, string content)
         {
             using (var sw = new StreamWriter(path, true))
             {
@@ -190,7 +192,7 @@ namespace LogInfo
             }
         }
 
-        private void DetectDebug()
+        private static void DetectDebug()
         {
             bool debugMode = false;
 
@@ -201,7 +203,7 @@ namespace LogInfo
                 debugMode = debuggableAttribute.IsJITTrackingEnabled;
             }
             
-            var customDebuggableAttribute = (DebugModeAttribute)this.GetType().GetCustomAttribute(typeof(DebugModeAttribute));
+            var customDebuggableAttribute = (DebugModeAttribute)typeof(Logger).GetCustomAttribute(typeof(DebugModeAttribute));
 
             if (customDebuggableAttribute != null)
             {

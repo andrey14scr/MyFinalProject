@@ -1,5 +1,5 @@
 ﻿using LogInfo;
-
+using MiniBot.Exceptions;
 using MiniBot.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -16,21 +16,27 @@ namespace MiniBot.Activity
         private class AccountWorker<T> where T : IAccount
         {
             private string _path;
-            private Logger logger;
 
             public AccountWorker(string directory, string file)
             {
                 _path = directory + "\\" + file;
-                logger = new Logger();
+                if (!Logger.IsInited)
+                {
+                    Logger.Init();
+                }
 
                 CheckJson();
             }
 
             public void AddAccount(T account)
             {
+                if (account == null)
+                {
+                    throw new NullReferenceException("Null account reference");
+                }
                 if (FindAccount(account.Login, account.Password, ref account))
                 {
-                    return;
+                    throw new AccountExistException("Already existed account", account);
                 }
 
                 List<T> accountsList = new List<T>();
@@ -43,7 +49,8 @@ namespace MiniBot.Activity
                     }
                     catch (Exception ex)
                     {
-                        logger.Error(ex.Message);
+                        Logger.Error(ex.Message);
+                        return;
                     }
                 }
 
@@ -62,7 +69,7 @@ namespace MiniBot.Activity
                     }
                     catch (Exception ex)
                     {
-                        logger.Error(ex.Message);
+                        Logger.Error(ex.Message);
                         return false;
                     }
                 }
@@ -73,11 +80,17 @@ namespace MiniBot.Activity
                     account = userAccount;
                     return true;
                 }
+
                 return false;
             }
 
             public void UpdateAccount(T account)
             {
+                if (account == null)
+                {
+                    throw new NullReferenceException("Null account reference");
+                }
+
                 List<T> accountsList;
                 using (StreamReader sr = new StreamReader(_path))
                 {
@@ -87,8 +100,15 @@ namespace MiniBot.Activity
                     }
                     catch (Exception ex)
                     {
-                        logger.Error(ex.Message);
-                        AddAccount(account);
+                        Logger.Error(ex.Message);
+                        try
+                        {
+                            AddAccount(account);
+                        }
+                        catch (AccountExistException aeEx)
+                        {
+                            Logger.Info(aeEx.Message, aeEx.InnerObject);
+                        }
                         return;
                     }
                 }
@@ -100,6 +120,11 @@ namespace MiniBot.Activity
 
             public void DeleteAccount(T account)
             {
+                if (account == null)
+                {
+                    throw new NullReferenceException("Null account reference");
+                }
+
                 List<T> accountsList;
                 using (StreamReader sr = new StreamReader(_path))
                 {
@@ -136,7 +161,14 @@ namespace MiniBot.Activity
             {
                 using (StreamWriter sw = new StreamWriter(_path))
                 {
-                    sw.Write(JsonSerializer.Serialize<List<T>>(accountsList));
+                    try
+                    {
+                        sw.Write(JsonSerializer.Serialize<List<T>>(accountsList));
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex.Message);
+                    }
                 }
             }
         }

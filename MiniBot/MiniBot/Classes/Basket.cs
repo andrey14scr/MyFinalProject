@@ -1,4 +1,6 @@
-﻿using MiniBot.Interfaces;
+﻿using LogInfo;
+
+using MiniBot.Interfaces;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -41,6 +43,11 @@ namespace MiniBot.Activity
 
         public void Add(T item, int id, short amount = 1)
         {
+            if (item == null)
+            {
+                throw new NullReferenceException("Null item reference");
+            }
+
             int index = _listOfItems.FindIndex(x => x.id == id);
 
             if (index != -1)
@@ -60,6 +67,11 @@ namespace MiniBot.Activity
 
         public void RemoveAt(int index)
         {
+            if (index < 0)
+            {
+                Logger.Error("Index can not be nagative");
+                return;
+            }
             _listOfItems.RemoveAt(index);
         }
 
@@ -75,6 +87,10 @@ namespace MiniBot.Activity
 
         public void Remove(T item, int id, short amount = 1)
         {
+            if (item == null)
+            {
+                throw new NullReferenceException("Null item reference");
+            }
             this.Add(item, id, (short)-amount);
         }
 
@@ -92,6 +108,16 @@ namespace MiniBot.Activity
 
         public void Insert(int index, T item, int id, short amount = 1)
         {
+            if (item == null)
+            {
+                throw new NullReferenceException("Null item reference");
+            }
+            if (index < 0)
+            {
+                Logger.Error("Index can not be nagative");
+                return;
+            }
+
             _listOfItems.Insert(index, (item, id, amount));
         }
 
@@ -113,6 +139,12 @@ namespace MiniBot.Activity
 
         public string GetItemInfo(int index)
         {
+            if (index < 0)
+            {
+                Logger.Error("Index can not be nagative");
+                return "";
+            }
+
             return _listOfItems[index].item.Name + " x" + _listOfItems[index].amount + " = " + String.Format("${0:0.00}", _listOfItems[index].item.Cost * _listOfItems[index].amount);
         }
 

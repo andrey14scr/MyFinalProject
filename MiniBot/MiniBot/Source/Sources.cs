@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LogInfo;
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -14,8 +16,17 @@ namespace MiniBot.Activity
         public static ResourceManager ResourceManager;
         static Sources()
         {
-            ResourceManager = new ResourceManager("MiniBot.Resources.Localization", Assembly.GetExecutingAssembly());
-
+            try
+            {
+                ResourceManager = new ResourceManager("MiniBot.Resources.Localization", Assembly.GetExecutingAssembly());
+            }
+            catch (Exception ex)
+            {
+                if (!Logger.IsInited)
+                    Logger.Init();
+                Logger.Error(ex.Message);
+                Environment.Exit(0);
+            }
             ChoiceLogin = "->" + GetLocal("login");
             ChoiceRegister = "->" + GetLocal("register");
             ChoicePizza = "->" + GetLocal("pizza");
@@ -144,12 +155,24 @@ namespace MiniBot.Activity
             {
                 return true;
             }
+
             return false;
         }
 
         public static string GetLocal(string name)
         {
-            return ResourceManager.GetString(name, CultureInfo.CurrentCulture);
+            string answer = "";
+
+            try
+            {
+                answer = ResourceManager.GetString(name, CultureInfo.CurrentCulture);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.Message);
+            }
+
+            return answer;
         }
     }
 }

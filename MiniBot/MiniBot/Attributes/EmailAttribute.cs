@@ -18,6 +18,10 @@ namespace MiniBot.Activity
 
         public EmailAttribute(string mask)
         {
+            if (string.IsNullOrEmpty(mask))
+            {
+                throw new ArgumentNullException("Mask must be not empty value!");
+            }
             Mask = mask;
         }
     }

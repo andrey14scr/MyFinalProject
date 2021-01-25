@@ -12,6 +12,7 @@ using LogInfo;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using MiniBot.Exceptions;
 
 namespace MiniBot.Activity
 {
@@ -95,7 +96,6 @@ namespace MiniBot.Activity
         private DBWorker _dbWorker = new DBWorker(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=" + (new FileInfo(Environment.CurrentDirectory + @"\Resources\DBProducts.mdf").FullName) + ";Integrated Security=True");
         private UserAccount _account = new UserAccount() { Name = guestName };
         private AccountWorker<UserAccount> accountWorker = new AccountWorker<UserAccount>("Resources", "accounts.json");
-        Logger _logger = new Logger();
         #endregion
 
         #region Properties
@@ -117,6 +117,9 @@ namespace MiniBot.Activity
             BotName = botname;
             Indent = new String(' ', BotName.Length + 2);
             accountWorker.CheckJson();
+
+            if (!Logger.IsInited)
+                Logger.Init();
         }
         #endregion
 
@@ -148,7 +151,17 @@ namespace MiniBot.Activity
                     {
                         SendMessage(GetLocal("AccountAlert"));
                         State = BotState.AccountDecision;
-                        CreateAccount();
+                        try
+                        {
+                            CreateAccount();
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(ex.Message);
+                            SendMessage(DefaultString, BotState.Start);
+                            return;
+                        }
+                        SendMessage(DefaultString, BotState.AskProduct);
                     }
                     break;
                 case BotState.WriteAndWait:
@@ -158,7 +171,17 @@ namespace MiniBot.Activity
                     if (command.Equals(ChoiceRegister))
                     {
                         State = BotState.AccountDecision;
-                        CreateAccount();
+                        try
+                        {
+                            CreateAccount();
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(ex.Message);
+                            SendMessage(DefaultString, BotState.Start);
+                            return;
+                        }
+                        SendMessage(DefaultString, BotState.AskProduct);
                     }
                     else if (command == ChoiceLogin)
                     {
@@ -230,7 +253,20 @@ namespace MiniBot.Activity
                     else if (command.Equals(ChoiceExit))
                     {
                         _backToMenu = false;
-                        accountWorker.UpdateAccount(_account);
+
+                        try
+                        {
+                            accountWorker.UpdateAccount(_account);
+                        }
+                        catch (AccountExistException ex)
+                        {
+                            Logger.Info(ex.Message, ex.InnerObject);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(ex.Message);
+                        }
+
                         _account.Exit();
                         SendMessage(DefaultString, BotState.AccountDecision);
                     }
@@ -249,6 +285,7 @@ namespace MiniBot.Activity
                     {
                         string typeProduct = "";
                         _currentProduct = _dbWorker.GetById(_currentID);
+
                         switch (_currentProduct)
                         {
                             case Pizza:
@@ -263,6 +300,7 @@ namespace MiniBot.Activity
                             default:
                                 break;
                         }
+
                         typeProduct += " ";
                         WriteMessage(GetLocal("InfoAbout") + " " + typeProduct);
                         _currentProduct.ShowInfo(Indent);
@@ -392,7 +430,14 @@ namespace MiniBot.Activity
             }
             else if (State == BotState.ShowMenu)
             {
-                ShowProductsChoices(_dbWorker.GetFromDB(x => x.GetType() == _currentType));
+                try
+                {
+                    ShowProductsChoices(_dbWorker.GetFromDB(x => x.GetType() == _currentType));
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex.Message);
+                }
 
                 AddChoice(_delimiter);
                 if (_account.Basket.Count > 0)
@@ -419,7 +464,14 @@ namespace MiniBot.Activity
                 {
                     for (int i = 0; i < _account.Basket.Count; i++)
                     {
-                        AddChoice(_account.Basket.GetItemInfo(i));
+                        try
+                        {
+                            AddChoice(_account.Basket.GetItemInfo(i));
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(ex.Message);
+                        }
                     }
                 }
 
@@ -432,9 +484,16 @@ namespace MiniBot.Activity
             else if (State == BotState.ProductInBusket)
             {
                 AddChoice(ChoiceEnlarge);
-                var item = _account.Basket.GetById(_currentID);
-                if (item.amount > 0)
-                    AddChoice(ChoiceReduce);
+                try
+                {
+                    var item = _account.Basket.GetById(_currentID);
+                    if (item.amount > 0)
+                        AddChoice(ChoiceReduce);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex.Message);
+                }
                 AddChoice(ChoiceRemove);
                 AddChoice(ChoiceBack);
 
@@ -542,7 +601,14 @@ namespace MiniBot.Activity
 
             MakeChoice();
 
-            Thread.CurrentThread.CurrentCulture = new CultureInfo(_buffer.Substring(0, 2));
+            try
+            {
+                Thread.CurrentThread.CurrentCulture = new CultureInfo(_buffer.Substring(0, 2));
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.Message);
+            }
 
             BotName = GetLocal("Henry");
             _account.Name = GetLocal("Guest");
@@ -664,11 +730,21 @@ namespace MiniBot.Activity
             _account.Password = _buffer;
 
             SendMessage(GetLocal("AccountCreated"), BotState.Write);
-            accountWorker.AddAccount(_account);
+
+            try
+            {
+                accountWorker.AddAccount(_account);
+            }
+            catch (AccountExistException ex)
+            {
+                Logger.Info(ex.Message, ex.InnerObject);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.Message);
+            }
 
             SubscribeAccount();
-
-            SendMessage(DefaultString, BotState.AskProduct);
         }
 
         private bool CheckEmail(string input)
@@ -677,13 +753,21 @@ namespace MiniBot.Activity
 
             if (emailAttribute == null)
             {
-                _logger.Error("Email attribute is not found.");
+                Logger.Error("Email attribute is not found.");
             }
 
-            if (Regex.IsMatch(input, emailAttribute.Mask, RegexOptions.IgnoreCase))
-                return true;
-            else
-                return false;
+            bool isMatch = false;
+
+            try
+            {
+                isMatch = Regex.IsMatch(input, emailAttribute.Mask, RegexOptions.IgnoreCase);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.Message);
+            }
+
+            return isMatch;
         }
 
         private bool CheckCommand()
@@ -790,6 +874,7 @@ namespace MiniBot.Activity
             }
             catch (Exception ex)
             {
+                Logger.Error(ex.Message);
                 Console.WriteLine("Something was wrong. More: " + ex.Message);
             }
         }

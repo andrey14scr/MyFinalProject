@@ -1,4 +1,5 @@
-﻿using MiniBot.Interfaces;
+﻿using MiniBot.Exceptions;
+using MiniBot.Interfaces;
 using MiniBot.Products;
 using System;
 using System.Collections.Generic;
@@ -102,7 +103,7 @@ namespace MiniBot.Activity
 
                     if (ParamFirst == null || ParamSecond == null || ParamThird == null) 
                     {
-                        throw new NullReferenceException();
+                        throw new DBWorkerException("Null additional values");
                     }
 
                     command.Parameters.Add(ParamFirst);
@@ -155,6 +156,12 @@ namespace MiniBot.Activity
                                             (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
                                         break;
                                 }
+
+                                if (product == null)
+                                {
+                                    throw new DBWorkerException("Null product");
+                                }
+
                                 product.Discount = (byte)reader["Discount"];
 
                                 if (predicate(product))
@@ -206,6 +213,12 @@ namespace MiniBot.Activity
                                         (float)reader["Volume"], (bool)reader["HasGase"], (bool)reader["IsAlcohol"]);
                                     break;
                             }
+
+                            if (result == null)
+                            {
+                                throw new DBWorkerException("Not found object");
+                            }
+
                             result.Discount = (byte)reader["Discount"];
                         }
 
