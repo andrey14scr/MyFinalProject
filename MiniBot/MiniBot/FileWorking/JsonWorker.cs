@@ -50,7 +50,7 @@ namespace MiniBot.Activity
                     catch (Exception ex)
                     {
                         Logger.Error(ex.Message);
-                        return;
+                        accountsList.Add(account);
                     }
                 }
 
@@ -143,11 +143,11 @@ namespace MiniBot.Activity
                 if (!Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
-                    File.Create(_path);
+                    CreateFile(_path);
                 }
                 else if (!File.Exists(_path))
                 {
-                    File.Create(_path);
+                    CreateFile(_path);
                 }
                 else if (File.ReadAllText(_path) != String.Empty)
                 {
@@ -155,6 +155,25 @@ namespace MiniBot.Activity
                 }
 
                 return false;
+            }
+
+            public bool HasAccount(string login)
+            {
+                List<T> accountsList = new List<T>();
+                using (StreamReader sr = new StreamReader(_path))
+                {
+                    try
+                    {
+                        accountsList = JsonSerializer.Deserialize<List<T>>(sr.ReadToEnd());
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex.Message);
+                        return false;
+                    }
+                }
+
+                return accountsList.Exists(acc => Equals(acc.Login, login));
             }
 
             private void WriteInfo(List<T> accountsList)
@@ -171,6 +190,13 @@ namespace MiniBot.Activity
                     }
                 }
             }
+        
+            private void CreateFile(string path)
+            {
+                var accountFile = File.Create(path);
+                accountFile.Close();
+            }
+
         }
     }
 }

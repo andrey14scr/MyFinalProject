@@ -160,7 +160,6 @@ namespace MiniBot.Activity
                             SendMessage(DefaultString, BotState.Start);
                             return;
                         }
-                        SendMessage(DefaultString, BotState.AskProduct);
                     }
                     break;
                 case BotState.WriteAndWait:
@@ -180,7 +179,6 @@ namespace MiniBot.Activity
                             SendMessage(DefaultString, BotState.Start);
                             return;
                         }
-                        SendMessage(DefaultString, BotState.AskProduct);
                     }
                     else if (command == ChoiceLogin)
                     {
@@ -475,25 +473,28 @@ namespace MiniBot.Activity
                 }
 
                 AddChoice(_delimiter);
-                AddChoice(ChoiceBuy);
+                if (_account.Basket.Count > 0)
+                    AddChoice(ChoiceBuy);
                 AddChoice(ChoiceBack);
 
                 MakeChoice();
             }
             else if (State == BotState.ProductInBusket)
             {
-                AddChoice(ChoiceEnlarge);
                 try
                 {
                     var item = _account.Basket.GetById(_currentID);
                     if (item.amount > 0)
+                    {
+                        AddChoice(ChoiceEnlarge);
                         AddChoice(ChoiceReduce);
+                        AddChoice(ChoiceRemove);
+                    }
                 }
                 catch (Exception ex)
                 {
                     Logger.Error(ex.Message);
                 }
-                AddChoice(ChoiceRemove);
                 AddChoice(ChoiceBack);
 
                 MakeChoice();
@@ -689,7 +690,8 @@ namespace MiniBot.Activity
                     }
                     catch (Exception ex)
                     {
-                        SendMessage(ex.Message + " " + GetLocal("Try again"));
+                        Logger.Info(ex.Message);
+                        SendMessage(GetLocal("Bad input format") + " " + GetLocal("Try again"));
                         continue;
                     }
                 }
@@ -718,6 +720,12 @@ namespace MiniBot.Activity
                     continue;
                 }
 
+                if (accountWorker.HasAccount(_buffer))
+                {
+                    SendMessage(GetLocal("HasAccount"));
+                    continue;
+                }
+
                 _account.Login = _buffer;
                 break;
             }
@@ -725,7 +733,10 @@ namespace MiniBot.Activity
             SendMessage(DefaultString, BotState.AccPassword);
 
             if (BackFromAccount(_buffer))
+            {
                 SendMessage(DefaultString, BotState.AccountDecision);
+                return;
+            }
             _account.Password = _buffer;
 
             SendMessage(GetLocal("AccountCreated"), BotState.Write);
@@ -742,6 +753,8 @@ namespace MiniBot.Activity
             {
                 Logger.Error(ex.Message);
             }
+
+            SendMessage(DefaultString, BotState.AskProduct);
 
             SubscribeAccount();
         }
@@ -840,20 +853,20 @@ namespace MiniBot.Activity
 
         private static void OrderCompleted(string email, string message)
         {
+            //SendEmail(email, message);
             Console.WriteLine(GetLocal("Order is completed"));
-            SendEmail(email, message);
         }
 
         private static void OrderDelivered(string email, string message)
         {
+            //SendEmail(email, message);
             Console.WriteLine(GetLocal("Order is delivered"));
-            SendEmail(email, message);
         }
 
         private static void OrderPaid(string email, string message)
         {
+            //SendEmail(email, message);
             Console.WriteLine(GetLocal("Order is paid"));
-            SendEmail(email, message);
         }
 
         private static void SendEmail(string email, string message)

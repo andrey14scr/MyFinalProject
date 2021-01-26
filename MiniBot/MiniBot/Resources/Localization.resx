@@ -216,6 +216,9 @@
   <data name="Guest" xml:space="preserve">
     <value>Guest</value>
   </data>
+  <data name="HasAccount" xml:space="preserve">
+    <value>This account is already exists!</value>
+  </data>
   <data name="Hello1" xml:space="preserve">
     <value>Hello, I am</value>
   </data>
