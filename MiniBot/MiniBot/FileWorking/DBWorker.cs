@@ -1,13 +1,10 @@
 ﻿using LogInfo;
-using MiniBot.Exceptions;
 using MiniBot.Interfaces;
 using MiniBot.Products;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using static MiniBot.Activity.Sources;
 
 namespace MiniBot.Activity
