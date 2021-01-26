@@ -132,15 +132,19 @@ namespace MiniBot.Activity
                 //$"{Indent}If you want to exit from the program in the time of input, just enter \"{CommandExit}\".\n" +
                 //$"{Indent}Or \"{CommandBack}\" to back on one step ago.\n" +
                 $"{Indent}{GetLocal("Hello3")}", BotState.Start);
+
+            while (State != BotState.Sleep)
+            {
+                GetAnswer();
+            }
+
+            ExitSystem();
         }
 
         public void DoAction(string command)
         {
             switch (State)
             {
-                case BotState.Sleep:
-                    ExitSystem();
-                    break;
                 case BotState.Start:
                     if (accountWorker.CheckJson())
                     {
@@ -582,7 +586,7 @@ namespace MiniBot.Activity
 
             WriteLineMessage(msg);
 
-            GetAnswer();
+            //GetAnswer();
         }
         #endregion
 
