@@ -47,7 +47,7 @@ namespace MiniBot.Activity
                     catch (Exception ex)
                     {
                         Logger.Error(ex.Message);
-                        accountsList.Add(account);
+                        accountsList = new List<T>();
                     }
                 }
 

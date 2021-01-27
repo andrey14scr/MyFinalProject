@@ -14,10 +14,14 @@ namespace MiniBot
 
             Logger.Init();
 
+            Logger.Debug("In debug mode started");
+
             AssistantBot bot = new AssistantBot();
 
             bot.SetLanguage();
             bot.Start();
+
+            System.Console.Read();
         }
     }
 }
