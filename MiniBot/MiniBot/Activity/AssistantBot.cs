@@ -382,8 +382,11 @@ namespace MiniBot.Activity
                     {
                         case CommandAgree:
                             _account.SendPaid();
+                            SendMessage(GetLocal("Order is completed"));
                             _account.SendCompleted();
+                            SendMessage(GetLocal("Order is delivered"));
                             _account.SendDelivered(_adress);
+                            SendMessage(GetLocal("Order is paid"));
                             SendMessage(DefaultString, BotState.Sleep);
                             break;
                         case CommandBack:
@@ -863,19 +866,19 @@ namespace MiniBot.Activity
         private static void OrderCompleted(string email, string message)
         {
             SendEmail(email, message);
-            Console.WriteLine(GetLocal("Order is completed"));
+            //Console.WriteLine(GetLocal("Order is completed"));
         }
 
         private static void OrderDelivered(string email, string message)
         {
             SendEmail(email, message);
-            Console.WriteLine(GetLocal("Order is delivered"));
+            //Console.WriteLine(GetLocal("Order is delivered"));
         }
 
         private static void OrderPaid(string email, string message)
         {
             SendEmail(email, message);
-            Console.WriteLine(GetLocal("Order is paid"));
+            //Console.WriteLine(GetLocal("Order is paid"));
         }
 
         private static void SendEmail(string email, string message)
@@ -887,7 +890,7 @@ namespace MiniBot.Activity
                 mail.Body = message;
 
                 SmtpClient client = new SmtpClient("smtp.yandex.ru");
-                client.Port = 25; //587
+                client.Port = 587; //25
                 client.Credentials = new System.Net.NetworkCredential("Andrey14scr@yandex.ru", "59645206y14");
                 client.EnableSsl = true;
 

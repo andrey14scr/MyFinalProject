@@ -258,22 +258,25 @@ namespace MiniBot.Activity
 
         public void RemoveFromDB(int id)
         {
-            string sqlExpression = "DELETE FROM TableOfNotes WHERE Id=" + id.ToString();
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            foreach (var table in ProductTables)
             {
-                try
+                string sqlExpression = $"DELETE FROM {table} WHERE Id={id}";
+                using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
-                    connection.Open();
-
-                    using (SqlCommand command = new SqlCommand(sqlExpression, connection))
+                    try
                     {
-                        command.ExecuteNonQuery();
+                        connection.Open();
+
+                        using (SqlCommand command = new SqlCommand(sqlExpression, connection))
+                        {
+                            command.ExecuteNonQuery();
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error(ex.Message);
-                    return;
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex.Message);
+                        return;
+                    }
                 }
             }
         }

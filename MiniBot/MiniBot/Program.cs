@@ -1,5 +1,6 @@
 ﻿using MiniBot.Activity;
 using LogInfo;
+using System.Net.Mail;
 
 namespace MiniBot
 {
