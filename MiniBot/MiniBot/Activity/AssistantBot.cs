@@ -586,8 +586,6 @@ namespace MiniBot.Activity
             State = nextState;
 
             WriteLineMessage(msg);
-
-            //GetAnswer();
         }
         #endregion
 
@@ -864,19 +862,19 @@ namespace MiniBot.Activity
 
         private static void OrderCompleted(string email, string message)
         {
-            //SendEmail(email, message);
+            SendEmail(email, message);
             Console.WriteLine(GetLocal("Order is completed"));
         }
 
         private static void OrderDelivered(string email, string message)
         {
-            //SendEmail(email, message);
+            SendEmail(email, message);
             Console.WriteLine(GetLocal("Order is delivered"));
         }
 
         private static void OrderPaid(string email, string message)
         {
-            //SendEmail(email, message);
+            SendEmail(email, message);
             Console.WriteLine(GetLocal("Order is paid"));
         }
 
