@@ -104,6 +104,7 @@ namespace MiniBot.Activity
             _listID.Clear();
 
             Console.WriteLine(_choices[index]);
+            Console.WriteLine();
 
             _choices.Clear();
         }

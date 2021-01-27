@@ -511,6 +511,7 @@ namespace MiniBot.Activity
                 {
                     _buffer = Console.ReadLine();
                 } while (!CheckCommand());
+                Console.WriteLine();
             }
 
             if (_isAuto)
@@ -616,6 +617,8 @@ namespace MiniBot.Activity
 
             BotName = GetLocal("Henry");
             _account.Name = GetLocal("Guest");
+
+            SetComands();
         }
         #endregion
 
@@ -659,6 +662,7 @@ namespace MiniBot.Activity
             _account = new UserAccount() { Name = GetLocal("Guest") };
 
             SendMessage(DefaultString, BotState.AccName);
+            GetAnswer();
 
             if (BackFromAccount(_buffer))
             {
@@ -671,6 +675,7 @@ namespace MiniBot.Activity
             while (true)
             {
                 SendMessage(DefaultString, BotState.AccBirthDate);
+                GetAnswer();
 
                 if (BackFromAccount(_buffer))
                 {
@@ -711,6 +716,7 @@ namespace MiniBot.Activity
             while (true)
             {
                 SendMessage(DefaultString, BotState.AccLogin);
+                GetAnswer();
 
                 if (BackFromAccount(_buffer))
                 {
@@ -735,6 +741,7 @@ namespace MiniBot.Activity
             }
 
             SendMessage(DefaultString, BotState.AccPassword);
+            GetAnswer();
 
             if (BackFromAccount(_buffer))
             {

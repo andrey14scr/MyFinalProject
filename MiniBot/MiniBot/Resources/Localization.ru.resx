@@ -249,6 +249,9 @@
   <data name="login" xml:space="preserve">
     <value>войти</value>
   </data>
+  <data name="Navigation" xml:space="preserve">
+    <value>Для навигации используйте клавиши</value>
+  </data>
   <data name="Not alcoholic" xml:space="preserve">
     <value>Не алкогольное</value>
   </data>

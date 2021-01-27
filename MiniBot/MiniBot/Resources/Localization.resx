@@ -246,6 +246,9 @@
   <data name="login" xml:space="preserve">
     <value>login</value>
   </data>
+  <data name="Navigation" xml:space="preserve">
+    <value>To navigate use keys</value>
+  </data>
   <data name="Not alcoholic" xml:space="preserve">
     <value>Not alcoholic</value>
   </data>

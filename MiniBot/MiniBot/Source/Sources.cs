@@ -22,6 +22,12 @@ namespace MiniBot.Activity
                 Logger.Error(ex.Message);
                 Environment.Exit(0);
             }
+
+            SetComands();
+        }
+
+        public static void SetComands()
+        {
             ChoiceLogin = "->" + GetLocal("login");
             ChoiceRegister = "->" + GetLocal("register");
             ChoicePizza = "->" + GetLocal("pizza");
@@ -42,7 +48,7 @@ namespace MiniBot.Activity
 
             Cost = GetLocal("Cost");
             Discount = GetLocal("Discount");
-            Description = GetLocal("Description"); 
+            Description = GetLocal("Description");
             Volume = GetLocal("Volume");
             g = GetLocal("g");
             WithGase = GetLocal("With gase");
@@ -95,23 +101,23 @@ namespace MiniBot.Activity
         public const string CommandBack = "-back";
         public const string CommandAgree = "-agree";
 
-        public static readonly string ChoiceLogin; 
-        public static readonly string ChoiceRegister;
-        public static readonly string ChoicePizza;
-        public static readonly string ChoiceSushi;
-        public static readonly string ChoiceDrink;
-        public static readonly string ChoiceBack;
-        public static readonly string ChoiceTake;
-        public static readonly string ChoiceSeeBasket;
-        public static readonly string ChoiceBuy;
-        public static readonly string ChoiceRemove;
-        public static readonly string ChoiceReduce;
-        public static readonly string ChoiceEnlarge;
-        public static readonly string ChoiceExit;
+        public static string ChoiceLogin; 
+        public static string ChoiceRegister;
+        public static string ChoicePizza;
+        public static string ChoiceSushi;
+        public static string ChoiceDrink;
+        public static string ChoiceBack;
+        public static string ChoiceTake;
+        public static string ChoiceSeeBasket;
+        public static string ChoiceBuy;
+        public static string ChoiceRemove;
+        public static string ChoiceReduce;
+        public static string ChoiceEnlarge;
+        public static string ChoiceExit;
 
-        public static readonly string mailTitle;
+        public static string mailTitle;
 
-        public static readonly string guestName;
+        public static string guestName;
 
         public const string PizzaTable = "PizzaTable";
         public const string SushiTable = "SushiTable";
@@ -122,24 +128,24 @@ namespace MiniBot.Activity
 
         public static string[] ProductTables = new string[] { PizzaTable, SushiTable, DrinkTable };
 
-        public static readonly string Cost;
-        public static readonly string Discount;
-        public static readonly string Description;
-        public static readonly string Volume;
-        public static readonly string g;
-        public static readonly string WithGase;
-        public static readonly string WithoutGase;
-        public static readonly string Alcoholic;
-        public static readonly string NotAlcoholic;
-        public static readonly string Score;
-        public static readonly string Composition;
-        public static readonly string Weight;
-        public static readonly string Raw;
-        public static readonly string Fried;
-        public static readonly string Size;
-        public static readonly string sm;
+        public static string Cost;
+        public static string Discount;
+        public static string Description;
+        public static string Volume;
+        public static string g;
+        public static string WithGase;
+        public static string WithoutGase;
+        public static string Alcoholic;
+        public static string NotAlcoholic;
+        public static string Score;
+        public static string Composition;
+        public static string Weight;
+        public static string Raw;
+        public static string Fried;
+        public static string Size;
+        public static string sm;
 
-        public static readonly string Total;
+        public static string Total;
 
         public static bool IsCommand(string command)
         {
