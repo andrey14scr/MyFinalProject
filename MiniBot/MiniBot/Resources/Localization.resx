@@ -255,6 +255,9 @@
   <data name="Order" xml:space="preserve">
     <value>Order</value>
   </data>
+  <data name="Order is completed" xml:space="preserve">
+    <value>Order is completed</value>
+  </data>
   <data name="Order is delivered" xml:space="preserve">
     <value>Order is delivered! Don't forget to take it.</value>
   </data>
