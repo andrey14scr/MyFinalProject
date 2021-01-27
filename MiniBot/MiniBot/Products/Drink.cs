@@ -25,7 +25,7 @@ namespace MiniBot.Products
             sb.SpaceAppend($"{Sources.Cost}: {Cost:$0.00}" + (Discount > 0 ? $" ({Sources.Discount} {Discount}%)\n" : "\n"));
             if (!String.IsNullOrEmpty(Description))
                 sb.SpaceAppend($"{Sources.Description}: {Description}\n");
-            sb.SpaceAppend($"{Sources.Volume}: {Volume} {Sources.g}\n");
+            sb.SpaceAppend($"{Sources.Volume}: {Volume} {Sources.l}\n");
             sb.SpaceAppend(HasGase ? $"{Sources.WithGase}\n" : $"{Sources.WithoutGase}\n");
             sb.SpaceAppend(IsAlcohol ? $"{Sources.Alcoholic}\n" : $"{Sources.NotAlcoholic}\n");
             sb.SpaceAppend($"{Sources.Score}: {(float)Score / 2}*");

@@ -62,6 +62,7 @@ namespace MiniBot.Activity
             Fried = GetLocal("Fried");
             Size = GetLocal("Size");
             sm = GetLocal("sm");
+            l = GetLocal("l");
 
             Total = GetLocal("Total");
         }
@@ -133,6 +134,7 @@ namespace MiniBot.Activity
         public static string Description;
         public static string Volume;
         public static string g;
+        public static string l;
         public static string WithGase;
         public static string WithoutGase;
         public static string Alcoholic;

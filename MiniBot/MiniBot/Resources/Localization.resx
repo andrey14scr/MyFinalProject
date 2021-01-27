@@ -123,6 +123,9 @@
   <data name="AccountAlert" xml:space="preserve">
     <value>Well, to take an order you should have an account. Let's create it.</value>
   </data>
+  <data name="AccountCreated" xml:space="preserve">
+    <value>Hooray! Now you can buy something with account</value>
+  </data>
   <data name="Adress" xml:space="preserve">
     <value>Adress</value>
   </data>
@@ -242,6 +245,9 @@
   </data>
   <data name="InfoAbout" xml:space="preserve">
     <value>Information about</value>
+  </data>
+  <data name="l" xml:space="preserve">
+    <value>l</value>
   </data>
   <data name="login" xml:space="preserve">
     <value>login</value>

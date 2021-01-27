@@ -246,6 +246,9 @@
   <data name="InfoAbout" xml:space="preserve">
     <value>Информация продукта</value>
   </data>
+  <data name="l" xml:space="preserve">
+    <value>л</value>
+  </data>
   <data name="login" xml:space="preserve">
     <value>войти</value>
   </data>
