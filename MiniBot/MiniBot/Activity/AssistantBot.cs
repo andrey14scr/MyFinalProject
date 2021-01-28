@@ -105,7 +105,7 @@ namespace MiniBot.Activity
 
         #region Ctors
         public AssistantBot() : this(GetLocal("Henry"), true) { }
-
+        
         public AssistantBot(string botname) : this(botname, true) { }
 
         public AssistantBot(bool isAuto) : this(GetLocal("Henry"), isAuto) { }

@@ -13,7 +13,6 @@ namespace MiniBot
             System.Console.WriteLine($"{Sources.GetLocal("Navigation")} {(char)down}, {(char)up}, Enter \n");
 
             Logger.Init();
-
             Logger.Debug("In debug mode started");
 
             AssistantBot bot = new AssistantBot();
